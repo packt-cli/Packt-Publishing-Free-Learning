@@ -18,9 +18,7 @@
   Once pip has been installed, run the following:
   
   ```
-  pip install requests
-  
-  pip install beautifulsoup4
+  pip install requests beautifulsoup4
 
   ```
   
@@ -45,13 +43,7 @@
 * Or set it to be invoked automatically:
   
   **LINUX** (tested on UBUNTU):
-  
-  modify access permissions of the script:
-  
-  ```
-  $ chmod a+x grabPacktFreeBook.py 
-  ```
-  
+
   **CRON** setup (more: https://help.ubuntu.com/community/CronHowto) :
   
   ```
@@ -116,17 +108,16 @@
     download **'Unity 4.x Game AI Programming'** and  **'Multithreading in C# 5.0 Cookbook'** books in all available formats (pdf, epub, mobi) with zipped source code file
 
   ```
-    [LOGIN_DATA]
-    email= youremail@youremail.com
-    password= yourpassword    
+  [LOGIN_DATA]
+  email= youremail@youremail.com
+  password= yourpassword    
 
-    
-    [DOWNLOAD_DATA]
-    downloadFolderPath: C:\Users\me\Desktop\myEbooksFromPackt
-    downloadBookAfterClaim: YES
-    downloadFormats: pdf, epub, mobi, code
-    downloadBookTitles: Unity 4.x Game AI Programming , Multithreading in C# 5.0 Cookbook
-    
+  [DOWNLOAD_DATA]
+  downloadFolderPath: C:\Users\me\Desktop\myEbooksFromPackt
+  downloadBookAfterClaim: YES
+  downloadFormats: pdf, epub, mobi, code
+  downloadBookTitles: Unity 4.x Game AI Programming , Multithreading in C# 5.0 Cookbook
+  
   ```  
 
 In case of any questions feel free to ask, happy grabbing!
