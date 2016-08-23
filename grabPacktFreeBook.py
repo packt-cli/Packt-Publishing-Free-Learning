@@ -79,10 +79,10 @@ if __name__ == '__main__':
         print(packtpubUrl+claimUrl)
         r = session.get(packtpubUrl+claimUrl,headers=reqHeaders,timeout=10)
     except TypeError as typeError:
-        print("[ERROR] - Type error occured %s "%typeError )
+        print("[ERROR] - Type error occured %s "%typeError, file=sys.stderr)
         sys.exit(1)
     except requests.exceptions.RequestException as exception:
-        print("[ERROR] - Exception occured %s "%exception )
+        print("[ERROR] - Exception occured %s "%exception, file=sys.stderr)
         sys.exit(1)
         
     if(r.status_code is 200):
@@ -93,4 +93,4 @@ if __name__ == '__main__':
             downloader.getDataOfAllMyBooks()
             downloader.downloadBooks([bookTitle], downloader.downloadFormats)            
     else:
-        print("[ERROR] - eBook: '" + bookTitle +"' has not been grabbed, respCode: "+str(r.status_code))
+        print("[ERROR] - eBook: '" + bookTitle +"' has not been grabbed, respCode: "+str(r.status_code), file=sys.stderr)
