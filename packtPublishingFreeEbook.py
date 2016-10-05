@@ -9,6 +9,7 @@ __version__ = "1.0.0"
 __email__ = "lukasz.uszko@gmail.com, daniel@vandorp.biz"
 
 import sys
+import time
 
 PY2 = sys.version_info[0] == 2
 if PY2:
@@ -49,6 +50,16 @@ class PacktAccountData(object):
         if(not os.path.exists(self.downloadFolderPath)):
             raise ValueError("[ERROR] Download folder path: '"+self.downloadFolderPath+ "' doesn't exist" )
         self.session = self.createSession()
+
+    def write_result(self, data):
+        with open(self.log_file, "a") as output:
+            output.write("\n")
+            for key, value in data.items():
+                output.write("%s --> %s\n" % (key.upper(), value))
+        print("[INFO] Complete informations for '%s' have been saved" % data["title"])
+
+    def __get_log_filename(self):
+        return self.configuration.get("DOWNLOAD_DATA", 'logFile')
 
     def __getLoginData(self):
         email= self.configuration.get("LOGIN_DATA",'email')
@@ -97,7 +108,27 @@ class FreeEBookGrabber(object):
         self.accountData = accountData
         self.session = self.accountData.session
         self.bookTitle = ""
-        
+
+    def get_info(self, r):
+        print("[INFO] Retrieving complete informations for '%s'" % self.bookTitle)
+        result_html = BeautifulSoup(r.text, 'html.parser')
+        last_grabbed_book = result_html.find('div', {'id': 'product-account-list'}).find('div')
+        book_url = last_grabbed_book.find('a').attrs['href']
+        print(book_url)
+        book_page = self.session.get('http://www.packtpub.com%s' % book_url, headers=self.accountData.reqHeaders,
+                                     timeout=10).text
+        page = BeautifulSoup(book_page, 'html.parser')
+
+        result_data = OrderedDict()
+        result_data["title"] = self.bookTitle
+        result_data["description"] = page.find('div', {'class': 'book-top-block-info-one-liner'}).text.strip()
+        author = page.find('div', {'class': 'book-top-block-info-authors'})
+        result_data["author"] = author.text.strip().split("\n")[0]
+        result_data["time"] = author.find('time').attrs["datetime"]
+        result_data["downloaded_at"] = time.strftime("%d-%m-%Y %H:%M")
+        print("[SUCCESS] Saved all infos about '%s'" % self.bookTitle)
+        return result_data
+
     def grabEbook(self):
         print("[INFO] - start grabbing eBook...")           
         r = self.session.get(self.accountData.freeLearningUrl, headers=self.accountData.reqHeaders,timeout=10)
@@ -109,6 +140,7 @@ class FreeEBookGrabber(object):
         r = self.session.get(self.accountData.packtPubUrl+claimUrl,headers=self.accountData.reqHeaders,timeout=10)
         if(r.status_code is 200):
             print("[SUCCESS] - eBook: '" + self.bookTitle +"' has been succesfully grabbed !")
+            self.get_info(r)
         else:
             raise requests.exceptions.RequestException("eBook:" + self.bookTitle +" has not been grabbed~! ,http GET status code != 200")
 
