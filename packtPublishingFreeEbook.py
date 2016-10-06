@@ -38,7 +38,7 @@ class PacktAccountData(object):
         self.configuration = configparser.ConfigParser()
         if(not self.configuration.read(self.cfgFilePath)):
             raise configparser.Error(self.cfgFilePath+ ' file not found')
-        
+        self.log_file = self.__get_log_filename()
         self.packtPubUrl= "https://www.packtpub.com"
         self.myBooksUrl= "https://www.packtpub.com/account/my-ebooks"
         self.loginUrl= "https://www.packtpub.com/register"
@@ -52,10 +52,14 @@ class PacktAccountData(object):
         self.session = self.createSession()
 
     def write_result(self, data):
+        """
+        Write result to file
+        :param data: the data to be writted down
+        """
         with open(self.log_file, "a") as output:
-            output.write("\n")
+            output.write('\n')
             for key, value in data.items():
-                output.write("%s --> %s\n" % (key.upper(), value))
+                output.write('%s --> %s\n' % (key.upper(), value))
         print("[INFO] Complete informations for '%s' have been saved" % data["title"])
 
     def __get_log_filename(self):
@@ -110,11 +114,15 @@ class FreeEBookGrabber(object):
         self.bookTitle = ""
 
     def get_info(self, r):
+        """
+        Log grabbed book information to log file
+        :param r: the previous response got when book has been successufully added to user library
+        :return: the data ready to be written to the log file
+        """
         print("[INFO] Retrieving complete informations for '%s'" % self.bookTitle)
         result_html = BeautifulSoup(r.text, 'html.parser')
         last_grabbed_book = result_html.find('div', {'id': 'product-account-list'}).find('div')
         book_url = last_grabbed_book.find('a').attrs['href']
-        print(book_url)
         book_page = self.session.get('http://www.packtpub.com%s' % book_url, headers=self.accountData.reqHeaders,
                                      timeout=10).text
         page = BeautifulSoup(book_page, 'html.parser')
@@ -129,7 +137,7 @@ class FreeEBookGrabber(object):
         print("[SUCCESS] Saved all infos about '%s'" % self.bookTitle)
         return result_data
 
-    def grabEbook(self):
+    def grabEbook(self, log=False):
         print("[INFO] - start grabbing eBook...")           
         r = self.session.get(self.accountData.freeLearningUrl, headers=self.accountData.reqHeaders,timeout=10)
         if(r.status_code is not 200):
@@ -140,7 +148,8 @@ class FreeEBookGrabber(object):
         r = self.session.get(self.accountData.packtPubUrl+claimUrl,headers=self.accountData.reqHeaders,timeout=10)
         if(r.status_code is 200):
             print("[SUCCESS] - eBook: '" + self.bookTitle +"' has been succesfully grabbed !")
-            self.get_info(r)
+            if log:
+                self.get_info(r)
         else:
             raise requests.exceptions.RequestException("eBook:" + self.bookTitle +" has not been grabbed~! ,http GET status code != 200")
 
@@ -229,6 +238,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-g","--grab", help="grabs daily ebook",action="store_true")
+    parser.add_argument("-gl", "--grabl", help= "grabs and log data", action="store_true")
     parser.add_argument("-gd","--grabd", help="grabs daily ebook and downloads the title afterwards",action="store_true")
     parser.add_argument("-da","--dall", help="downloads all ebooks from your account",action="store_true")
     parser.add_argument("-dc","--dchosen", help="downloads chosen titles described in [downloadBookTitles] field",action="store_true")
@@ -236,7 +246,10 @@ if __name__ == '__main__':
     cfgFilePath= os.path.join(os.getcwd(),"configFile.cfg")
     try:
         myAccount = PacktAccountData(cfgFilePath)
-        if args.grab or args.grabd: 
+        if args.grabl:
+            grabber = FreeEBookGrabber(myAccount)
+            grabber.grabEbook(log=True)
+        if args.grab or args.grabd:
             grabber =FreeEBookGrabber(myAccount)
             grabber.grabEbook()
         if args.grabd or args.dall or args.dchosen:
