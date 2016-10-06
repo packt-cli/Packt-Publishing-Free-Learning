@@ -1,7 +1,7 @@
-FROM dockerfile/python
+FROM ubuntu:16.04
 MAINTAINER Francesco Bruni <brunifrancesco02@gmail.com>
 
-ADD inventory-file /etc/ansible/hosts
+ADD inventory /etc/ansible/hosts
 ADD provision.yml provision.yml
 ADD ansible.cfg /etc/ansible/ansible.cfg
 ADD provision.yml provision.yml
