@@ -246,14 +246,15 @@ if __name__ == '__main__':
     cfgFilePath= os.path.join(os.getcwd(),"configFile.cfg")
     try:
         myAccount = PacktAccountData(cfgFilePath)
+        downloader = BookDownloader(myAccount)
         if args.grabl:
             grabber = FreeEBookGrabber(myAccount)
-            grabber.grabEbook(log=True)
+            result = grabber.grabEbook(log=True)
+            myAccount.write_result(result)
         if args.grab or args.grabd:
             grabber =FreeEBookGrabber(myAccount)
             grabber.grabEbook()
         if args.grabd or args.dall or args.dchosen:
-            downloader = BookDownloader(myAccount)
             downloader.getDataOfAllMyBooks()
         if args.grabd:          
             downloader.downloadBooks([grabber.bookTitle])     
