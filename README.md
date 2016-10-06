@@ -25,7 +25,13 @@
   ```  
   pip install future
   ```
-  
+
+  or just run:
+
+  ```
+  pip install -r requirements.txt
+  ```
+
 * change a name of **configFileTemplate.cfg** to **configFile.cfg**  
 * change your login credentials in **configFile.cfg** file
   
@@ -37,7 +43,12 @@
   ```
   python packtPublishingFreeEbook.py -g
   ```
-  
+
+  - Option -gl [--grabl] - claims (grabs) a daily eBook into your account and save book info to log file specified in config file
+  ```
+  python packtPublishingFreeEbook.py -gl
+  ```
+
   - Option -gd [--grabd] - claims (grabs) a daily ebook and downloads the title afterwards to the location specified under *[downloadFolderPath]* field (configFile.cfg file)
   ```
   python packtPublishingFreeEbook.py -gd
@@ -128,7 +139,8 @@
     [DOWNLOAD_DATA]
     downloadFolderPath: C:\Users\me\Desktop\myEbooksFromPackt
     downloadFormats: pdf, epub, mobi, code
-    downloadBookTitles: Unity 4.x Game AI Programming , Multithreading in C# 5.0 Cookbook    
+    downloadBookTitles: Unity 4.x Game AI Programming , Multithreading in C# 5.0 Cookbook
+    logFile: logfile.log
   ```
   
   run:
