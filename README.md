@@ -25,7 +25,13 @@
   ```  
   pip install future
   ```
-  
+
+  or just run:
+
+  ```
+  pip install -r requirements.txt
+  ```
+
 * change a name of **configFileTemplate.cfg** to **configFile.cfg**  
 * change your login credentials in **configFile.cfg** file
   
