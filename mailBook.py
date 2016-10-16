@@ -25,6 +25,7 @@ class MailBook:
             self.to_emails = config.get("MAIL", 'toEmails').split(COMMA)
         except configparser.NoSectionError:
             raise ValueError("ERROR: need at least one from and one or more to emails")
+        self.kindle_emails = config.get("MAIL", 'kindleEmails').split(COMMA)
 
     def send_book(self, book, to=None, subject=None, msg=None):
         if not os.path.isfile(book):
@@ -51,10 +52,9 @@ class MailBook:
         smtp.close()
 
     def send_kindle(self, book):
-        kindle_emails = config.get("MAIL", 'kindleEmails').split(COMMA)
-        if not kindle_emails:
+        if not self.kindle_emails:
             return
-        self.send_book(book, to=kindle_emails) 
+        self.send_book(book, to=self.kindle_emails) 
 
 
 if __name__ == "__main__":

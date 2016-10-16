@@ -31,8 +31,9 @@ import re
 from collections import OrderedDict
 from bs4 import BeautifulSoup
 
+from mail import send_mail 
 
-logging.basicConfig(format='[%(levelname)s] - %(message)s', level=logging.INFO)
+logging.basicConfig(format='[%(levelname)s] - %(message)s', filename='logfile.log', level=logging.INFO)
 # adding a new logging level
 logging.SUCCESS = 13
 logging.addLevelName(logging.SUCCESS, 'SUCCESS')
@@ -159,7 +160,7 @@ class FreeEBookGrabber(object):
         self.__writeEbookInfoData(resultData)
         return resultData
 
-    def grabEbook(self, log=False):
+    def grabEbook(self, log=True):
         """Grabs the ebook"""
         logger.info("Start grabbing eBook...")
         r = self.session.get(self.accountData.freeLearningUrl,
@@ -215,7 +216,7 @@ class BookDownloader(object):
                         downloadUrls['code'] = m.group(0)
             self.bookData[i]['downloadUrls'] = downloadUrls
 
-    def downloadBooks(self, titles=None, formats=None):
+    def downloadBooks(self, titles=None, formats=None, mail=False):
         """
         Downloads the ebooks.
         :param titles: list('C# tutorial', 'c++ Tutorial') ;
@@ -268,6 +269,12 @@ class BookDownloader(object):
                             else:
                                 logger.success("eBook: '{}.{}' downloaded successfully!".format(title, form))
                             nrOfBooksDownloaded = i + 1
+                            if mail:
+                                logger.info("emailing book {} to mail and kindle".format(fullFilePath))
+                                if form == 'pdf':
+                                    send_mail("info@bobbelderbos.com", ["bobbelderbos@gmail.com", "sequeira.julian@gmail.com"], "new free packt book", "today's free ebook (automate the boring stuff hahaha)", files=[fullFilePath])
+                                if form == 'mobi':
+                                    send_mail("info@bobbelderbos.com", ["bobbelderbos_22@kindle.com"], "new free packt book", "today's free ebook", files=[fullFilePath])
                         else:
                             message = "Cannot download '{}'".format(title)
                             logger.error(message)
@@ -302,7 +309,7 @@ if __name__ == '__main__':
         if args.grabd or args.dall or args.dchosen:
             downloader.getDataOfAllMyBooks()
         if args.grabd:
-            downloader.downloadBooks([grabber.bookTitle])
+            downloader.downloadBooks([grabber.bookTitle], mail=True)
         elif args.dall:
             downloader.downloadBooks()
         elif args.dchosen:
