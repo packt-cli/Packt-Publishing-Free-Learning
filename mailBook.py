@@ -9,7 +9,7 @@ from email.utils import COMMASPACE, formatdate
 
 COMMA = ", "
 CONFIG_FILE = "configFile.cfg"
-DEFAULT_MSG = "Enjoy!"
+DEFAULT_BODY = "Enjoy!"
 SERVER = "127.0.0.1"
 DEFAULT_SUBJECT = "New free packt ebook"
 
@@ -27,7 +27,7 @@ class MailBook:
             raise ValueError("ERROR: need at least one from and one or more to emails")
         self.kindle_emails = config.get("MAIL", 'kindleEmails').split(COMMA)
 
-    def send_book(self, book, to=None, subject=None, msg=None):
+    def send_book(self, book, to=None, subject=None, body=None):
         if not os.path.isfile(book):
             raise
         book_name = basename(book)
@@ -38,8 +38,8 @@ class MailBook:
         msg['To'] = COMMASPACE.join(self.to_emails)
         msg['Date'] = formatdate(localtime=True)
         msg['Subject'] = subject if subject else "{}: {}".format(DEFAULT_SUBJECT, book_name)
-        msg = msg if msg else DEFAULT_MSG
-        msg.attach(MIMEText(msg))
+        body = body if body else DEFAULT_BODY
+        msg.attach(MIMEText(body))
         with open(book, "rb") as f:
             part = MIMEApplication(
                 f.read(),
@@ -59,5 +59,6 @@ class MailBook:
 
 if __name__ == "__main__":
     mb = MailBook()
-    mb.send_kindle("/home3/bobbelde/code/third-party/packt/books/Learning NGUI for Unity.mobi")
+    mb.send_kindle("/Users/bbelderb/Dropbox/books/programming books/Head_First_Design_Patterns.mobi")
+    #mb.send_kindle("/home3/bobbelde/code/third-party/packt/books/Learning NGUI for Unity.mobi")
     #mb.send_mail("abc@bobcodes.it", ["hello@gmail.com"], "test", "your new free ebook for today", files=["books/somebooks.pdf"])
