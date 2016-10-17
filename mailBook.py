@@ -59,6 +59,4 @@ class MailBook:
 
 if __name__ == "__main__":
     mb = MailBook()
-    mb.send_kindle("/Users/bbelderb/Dropbox/books/programming books/Head_First_Design_Patterns.mobi")
-    #mb.send_kindle("/home3/bobbelde/code/third-party/packt/books/Learning NGUI for Unity.mobi")
-    #mb.send_mail("abc@bobcodes.it", ["hello@gmail.com"], "test", "your new free ebook for today", files=["books/somebooks.pdf"])
+    mb.send_kindle("Learning NGUI for Unity.mobi")

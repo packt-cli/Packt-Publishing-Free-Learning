@@ -31,7 +31,7 @@ import re
 from collections import OrderedDict
 from bs4 import BeautifulSoup
 
-from mail import send_mail 
+from mailBook import MailBook 
 
 logging.basicConfig(format='[%(levelname)s] - %(message)s', filename='logfile.log', level=logging.INFO)
 # adding a new logging level
@@ -271,10 +271,11 @@ class BookDownloader(object):
                             nrOfBooksDownloaded = i + 1
                             if mail:
                                 logger.info("emailing book {} to mail and kindle".format(fullFilePath))
+                                mb = MailBook()
                                 if form == 'pdf':
-                                    send_mail("info@bobbelderbos.com", ["bobbelderbos@gmail.com", "sequeira.julian@gmail.com"], "new free packt book", "today's free ebook (automate the boring stuff hahaha)", files=[fullFilePath])
-                                if form == 'mobi':
-                                    send_mail("info@bobbelderbos.com", ["bobbelderbos_22@kindle.com"], "new free packt book", "today's free ebook", files=[fullFilePath])
+                                    mb.send_book(fullFilePath)
+                                elif form == 'mobi':
+                                    mb.send_kindle(fullFilePath)
                         else:
                             message = "Cannot download '{}'".format(title)
                             logger.error(message)
