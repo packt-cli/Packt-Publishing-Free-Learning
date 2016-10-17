@@ -10,7 +10,7 @@ from email.utils import COMMASPACE, formatdate
 COMMA = ", "
 CONFIG_FILE = "configFile.cfg"
 DEFAULT_BODY = "Enjoy!"
-SERVER = "127.0.0.1"
+SERVER = "localhost"
 DEFAULT_SUBJECT = "New free packt ebook"
 
 class MailBook:
