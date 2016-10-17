@@ -296,6 +296,8 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument("-dc", "--dchosen", help="downloads chosen titles described in [downloadBookTitles] field",
                         action="store_true")
+    parser.add_argument("-m", "--mail", help="send download to emails defined in config file", default=False,
+                        action="store_true")
     args = parser.parse_args()
     cfgFilePath = os.path.join(os.getcwd(), "configFile.cfg")
     try:
@@ -310,7 +312,7 @@ if __name__ == '__main__':
         if args.grabd or args.dall or args.dchosen:
             downloader.getDataOfAllMyBooks()
         if args.grabd:
-            downloader.downloadBooks([grabber.bookTitle], mail=True)
+            downloader.downloadBooks([grabber.bookTitle], mail=args.mail) # only use email for single title option
         elif args.dall:
             downloader.downloadBooks()
         elif args.dchosen:
