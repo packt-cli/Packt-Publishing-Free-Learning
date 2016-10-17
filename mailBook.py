@@ -23,6 +23,7 @@ class MailBook:
         try:
             self.send_from = config.get("MAIL", 'fromEmail')
             self.to_emails = config.get("MAIL", 'toEmails').split(COMMA)
+            self.bcc_emails = config.get("MAIL", 'bccEmails').split(COMMA)
         except configparser.NoSectionError:
             raise ValueError("ERROR: need at least one from and one or more to emails")
         self.kindle_emails = config.get("MAIL", 'kindleEmails').split(COMMA)
@@ -48,7 +49,7 @@ class MailBook:
             part['Content-Disposition'] = 'attachment; filename="{}"'.format(book_name)
             msg.attach(part)
         smtp = smtplib.SMTP(SERVER)
-        smtp.sendmail(self.send_from, self.to_emails, msg.as_string())
+        smtp.sendmail(self.send_from, self.to_emails + self.bcc_emails, msg.as_string())
         smtp.close()
 
     def send_kindle(self, book):
