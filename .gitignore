@@ -2,3 +2,5 @@ configFile.cfg
 *pyc
 *swp
 *log
+books
+!books/readme
