@@ -23,9 +23,10 @@ class MailBook:
         try:
             self.send_from = config.get("MAIL", 'fromEmail')
             self.to_emails = config.get("MAIL", 'toEmails').split(COMMA)
-            self.bcc_emails = config.get("MAIL", 'bccEmails').split(COMMA)
         except configparser.NoSectionError:
             raise ValueError("ERROR: need at least one from and one or more to emails")
+        self.cc_emails = config.get("MAIL", 'ccEmails').split(COMMA) if config.has_option("MAIL", 'ccEmails') else []
+        self.bcc_emails = config.get("MAIL", 'bccEmails').split(COMMA) if config.has_option("MAIL", "bccEmails") else []
         self.kindle_emails = config.get("MAIL", 'kindleEmails').split(COMMA)
 
     def send_book(self, book, to=None, subject=None, body=None):
@@ -37,6 +38,8 @@ class MailBook:
         if to:
             self.to_emails = to
         msg['To'] = COMMASPACE.join(self.to_emails)
+        if self.cc_emails:
+            msg['Cc'] = COMMASPACE.join(self.cc_emails) # bcc hidden
         msg['Date'] = formatdate(localtime=True)
         msg['Subject'] = subject if subject else "{}: {}".format(DEFAULT_SUBJECT, book_name)
         body = body if body else DEFAULT_BODY
@@ -49,7 +52,7 @@ class MailBook:
             part['Content-Disposition'] = 'attachment; filename="{}"'.format(book_name)
             msg.attach(part)
         smtp = smtplib.SMTP(SERVER)
-        smtp.sendmail(self.send_from, self.to_emails + self.bcc_emails, msg.as_string())
+        smtp.sendmail(self.send_from, self.to_emails + self.cc_emails + self.bcc_emails, msg.as_string())
         smtp.close()
 
     def send_kindle(self, book):
@@ -60,4 +63,4 @@ class MailBook:
 
 if __name__ == "__main__":
     mb = MailBook()
-    mb.send_kindle("Learning NGUI for Unity.mobi")
+    #mb.send_kindle("book.mobi") # - does not work with my config, need additional testing
