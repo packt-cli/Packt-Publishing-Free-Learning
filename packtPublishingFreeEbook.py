@@ -23,6 +23,7 @@ if PY2:
     sys.setdefaultencoding('utf8')
 
 import requests
+requests.packages.urllib3.disable_warnings() # Disable Request Warning
 import os
 import configparser
 import argparse
