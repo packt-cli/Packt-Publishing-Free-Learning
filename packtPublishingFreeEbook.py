@@ -23,6 +23,7 @@ if PY2:
     sys.setdefaultencoding('utf8')
 
 import requests
+requests.packages.urllib3.disable_warnings() # Disable Request Warning
 import os
 import configparser
 import argparse
@@ -248,6 +249,7 @@ class BookDownloader(object):
                         if ch in tempBookData[i]['title']:
                             tempBookData[i]['title'] = tempBookData[i]['title'].replace(ch, ' ')
                     title = tempBookData[i]['title']
+                    title = title.replace(" ", "_")
                     try:
                         logger.info("Title: '{}'".format(title))
                     except Exception as e:
@@ -259,7 +261,7 @@ class BookDownloader(object):
                     else:
                         targetDownloadPath = os.path.join(self.accountData.downloadFolderPath)
                     fullFilePath = os.path.join(targetDownloadPath,
-                                                "{}.{}".format(tempBookData[i]['title'], fileType))
+                                                "{}.{}".format(tempBookData[i]['title'].replace(" ", "_"), fileType))
                     if os.path.isfile(fullFilePath):
                         logger.info("'{}.{}' already exists under the given path".format(title, fileType))
                     else:
