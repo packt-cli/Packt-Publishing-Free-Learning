@@ -243,7 +243,7 @@ class BookDownloader(object):
                         fileType = 'zip'
                     else:
                         fileType = form
-                    forbiddenChars = ['?', ':', '*', '/', '<', '>', '"', '|', '\\', '\u2013']
+                    forbiddenChars = ['\'', '?', ':', '*', '/', '<', '>', '"', '|', '\\', '\u2013']
                     for ch in forbiddenChars:
                         if ch in tempBookData[i]['title']:
                             tempBookData[i]['title'] = tempBookData[i]['title'].replace(ch, ' ')
@@ -334,37 +334,44 @@ if __name__ == '__main__':
 
         if args.grabd or args.dall or args.dchosen or args.sgd or args.mail:
             downloader.getDataOfAllMyBooks()
-        
+
         intoFolder = False
         if args.folder:
             intoFolder = True
-            
+
         if args.grabd or args.sgd or args.mail:
             if args.sgd or args.mail:
                 myAccount.downloadFolderPath = os.getcwd()
             downloader.downloadBooks([grabber.bookTitle], intoFolder = intoFolder)
+
             if args.sgd or args.mail:
+               # nomalize book title
+               forbiddenChars = ['\'', '?', ':', '*', '/', '<', '>', '"', '|', '\\', '\u2013']
+               for ch in forbiddenChars:
+                  grabber.bookTitle = grabber.bookTitle.replace(ch," ")
+
                paths = [os.path.join(myAccount.downloadFolderPath, path) \
                        for path in os.listdir(myAccount.downloadFolderPath) \
                            if os.path.isfile(path) and path.find(grabber.bookTitle) is not -1]
-            if args.sgd:
-               googleDrive.send_files(paths)
-            elif args.mail:
-               from utils.mail import MailBook
-               mb = MailBook(cfgFilePath)
-               pdfPath = None
-               mobiPath = None
-               try:
-                   pdfPath = [path for path in paths if path.split('.')[-1] == 'pdf'][-1]
-                   mobiPath = [path for path in paths if path.split('.')[-1] == 'mobi'][-1]
-               except:
-                   pass
-               if pdfPath:
-                   mb.send_book(pdfPath)
-               if mobiPath:
-                   mb.send_kindle(mobiPath)
-            if args.sgd or args.mail:
-               [os.remove(path) for path in paths]
+
+               if args.sgd:
+                  googleDrive.send_files(paths)
+               elif args.mail:
+                  from utils.mail import MailBook
+                  mb = MailBook(cfgFilePath)
+                  pdfPath = None
+                  mobiPath = None
+                  try:
+                      pdfPath = [path for path in paths if path.split('.')[-1] == 'pdf'][-1]
+                      mobiPath = [path for path in paths if path.split('.')[-1] == 'mobi'][-1]
+                  except:
+                      pass
+                  if pdfPath:
+                      mb.send_book(pdfPath)
+                  if mobiPath:
+                      mb.send_kindle(mobiPath)
+               if args.sgd or args.mail:
+                  [os.remove(path) for path in paths]
 
         elif args.dall:
             downloader.downloadBooks(intoFolder = intoFolder)
