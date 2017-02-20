@@ -3,3 +3,7 @@ beautifulsoup4==4.5.1
 future
 wheel==0.24.0
 configparser
+bs4
+google-api-python-client
+google-api-python-client-py3
+virtualenv
