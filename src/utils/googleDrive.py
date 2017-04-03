@@ -52,7 +52,7 @@ class GoogleDriveManager():
         the OAuth2 flow is completed to obtain the new credentials.
         Returns: the obtained credentials.
         '''
-        home_dir = os.getcwd()
+        home_dir = self.cfg_file_path
         credential_dir = os.path.join(home_dir, '.credentials')
         if not os.path.exists(credential_dir):
             os.makedirs(credential_dir)
