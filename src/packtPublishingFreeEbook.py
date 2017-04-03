@@ -11,7 +11,7 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup
 
 from utils import *
-logger = log_manager.get_logger(__name__)
+logger={}
 # downgrading logging level for requests
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -320,6 +320,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     cfgFilePath = os.path.join(args.cfgpath, "configFile.cfg")
+    logger = log_manager.get_logger(__name__, args.cfgpath)
 
 #try:
     session = PacktPubHttpSession(PacktAccountDataModel(cfgFilePath))
