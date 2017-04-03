@@ -316,9 +316,10 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument("--noauth_local_webserver", help="set if you want auth GoogleDrive without local browser",
                         action="store_true")
+    parser.add_argument("-c", "--cfgpath", default=os.getcwd(), help="select folder where config file can be found")
 
     args = parser.parse_args()
-    cfgFilePath = os.path.join(os.getcwd(), "configFile.cfg")
+    cfgFilePath = os.path.join(args.cfgpath, "configFile.cfg")
 
 #try:
     session = PacktPubHttpSession(PacktAccountDataModel(cfgFilePath))
