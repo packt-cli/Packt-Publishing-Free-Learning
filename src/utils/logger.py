@@ -4,12 +4,13 @@ import logging
 import os
 import sys
 
-LOG_FILE_PATH = os.path.join(os.getcwd(), "LOG_FILE.log")
-def get_logger(module_name):
+def get_logger(module_name,cfgFilePath=os.getcwd()):
     """ 
         module_name just to distinguish where the logs come from
     """
+    LOG_FILE_PATH = os.path.join(cfgFilePath, "LOG_FILE.log")
     # adding a new logging level
+
     logging.SUCCESS = 19   # as ALL = 0, DEBUG = 10, INFO = 20, WARN = 30, ERROR = 40, FATAL = CRITICAL, CRITICAL = 50
     logging.addLevelName(logging.SUCCESS, 'SUCCESS')
     logger = logging.getLogger(module_name)
