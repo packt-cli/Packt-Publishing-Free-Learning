@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-import requests
 import os
 import configparser
-import re
 import smtplib
 from os.path import basename
 from email.mime.application import MIMEApplication
@@ -19,6 +17,7 @@ COMMA = ", "
 DEFAULT_BODY = "Enjoy!"
 DEFAULT_SUBJECT = "New free packt ebook"
 
+
 class MailBook:
 
     def __init__(self, cfgFilePath):
@@ -30,19 +29,22 @@ class MailBook:
             self._smtp_port = config.get("MAIL", 'port')
             self._email_pass = config.get("MAIL", 'password')
             self._send_from = config.get("MAIL", 'email')
-            self._to_emails = config.get("MAIL", 'toEmails').split(COMMA)
-            self._kindle_emails = config.get("MAIL", 'kindleEmails').split(COMMA)
+            self._to_emails = list(filter(None, config.get("MAIL", 'toEmails').split(COMMA)))
+            self._kindle_emails = list(filter(None, config.get("MAIL", 'kindleEmails').split(COMMA)))
         except configparser.NoSectionError:
-            raise ValueError("ERROR: need at least one from and one or more to emails")
+            raise ValueError("ERROR: need at least one from and one or more to emails.")
 
     def send_book(self, book, to=None, subject=None, body=None):
         if not os.path.isfile(book):
-            raise
+            raise ValueError("ERROR: {} file doesn't exist.".format(book))
         book_name = basename(book)
+
+        self._to_emails = to or self._to_emails
+        if not self._to_emails:
+            raise ValueError("ERROR: no email adress to send the book to was provided.")
+
         msg = MIMEMultipart()
         msg['From'] = self._send_from
-        if to:
-            self._to_emails = to
         msg['To'] = COMMASPACE.join(self._to_emails)
         msg['Date'] = formatdate(localtime=True)
         msg['Subject'] = subject if subject else "{}: {}".format(DEFAULT_SUBJECT, book_name)
@@ -66,11 +68,11 @@ class MailBook:
             smtp.sendmail(self._send_from, self._to_emails, msg.as_string())
             logger.info('Email to {} has been succesfully sent'.format(','.join(self._to_emails)))
         except Exception as e:
-            logger.error('Sending failed with an error: {}'.format(str(e)))    
+            logger.error('Sending failed with an error: {}'.format(str(e)))
         smtp.quit()
 
     def send_kindle(self, book):
         if not self._kindle_emails:
             return
-        self.send_book(book, to=self._kindle_emails) 
+        self.send_book(book, to=self._kindle_emails)
 
