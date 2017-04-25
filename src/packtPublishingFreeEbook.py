@@ -8,12 +8,20 @@ import argparse
 import re
 import sys
 from collections import OrderedDict
+import datetime as dt
 from bs4 import BeautifulSoup
 
 from utils import *
 logger = log_manager.get_logger(__name__)
 # downgrading logging level for requests
 logging.getLogger("requests").setLevel(logging.WARNING)
+
+DATE_FORMAT = "%Y/%m/%d"
+
+SUCCESS_EMAIL_SUBJECT = "{} New free Packt ebook: \"{}\""
+SUCCESS_EMAIL_BODY = "A new free Packt ebook \"{}\" was successfully grabbed. Enjoy!"
+FAILURE_EMAIL_SUBJECT = "{} Grabbing a new free Packt ebook failed"
+FAILURE_EMAIL_BODY = "Today's free Packt ebook grabbing has failed with exception: {}!\n\nCheck this out!"
 
 
 #################################-MAIN CLASSES-###########################################
@@ -118,6 +126,7 @@ class BookGrabber(object):
         self.session = currentSession.getCurrentHttpSession()
         self.accountData = currentSession.getCurrentConfig()
         self.bookTitle = ""
+        self.pretty_book_title = None
 
     def __writeEbookInfoData(self, data):
         """
@@ -168,7 +177,8 @@ class BookGrabber(object):
             raise requests.exceptions.RequestException("http GET status code != 200")
         html = BeautifulSoup(r.text, 'html.parser')
         claimUrl = html.find(attrs={'class': 'twelve-days-claim'})['href']
-        self.bookTitle = PacktAccountDataModel.convertBookTitleToValidString(html.find('div', {'class': 'dotd-title'}).find('h2').next_element)
+        self.pretty_book_title = html.find('div', {'class': 'dotd-title'}).find('h2').next_element.strip()
+        self.bookTitle = PacktAccountDataModel.convertBookTitleToValidString(self.pretty_book_title)
         r = self.session.get(self.accountData.packtPubUrl + claimUrl,
                              headers=self.accountData.reqHeaders, timeout=10)
         if r.status_code is 200 and r.text.find('My eBooks') != -1:
@@ -332,6 +342,19 @@ if __name__ == '__main__':
         if args.grab or args.grabl or args.grabd or args.sgd or args.mail:
             grabber.grabEbook(logEbookInfodata=args.grabl)
 
+            # Send email about successful book grab. Do it only when book
+            # isn't going to be emailed as we don't want to send email twice.
+            if args.report_mail and not args.mail:
+                from utils.mail import MailBook
+                mb = MailBook(cfgFilePath)
+                mb.send_info(
+                    subject=SUCCESS_EMAIL_SUBJECT.format(
+                        dt.datetime.now().strftime(DATE_FORMAT),
+                        grabber.pretty_book_title
+                    ),
+                    body=SUCCESS_EMAIL_BODY.format(grabber.pretty_book_title)
+                )
+
         # Download book(s) into proper location
         if args.grabd or args.dall or args.dchosen or args.sgd or args.mail:
             downloader.getDataOfAllMyBooks()
@@ -353,11 +376,11 @@ if __name__ == '__main__':
                 if os.path.isfile(path) and grabber.bookTitle in path
             ]
             if args.sgd:
-                from .utils.googleDrive import GoogleDriveManager
+                from utils.googleDrive import GoogleDriveManager
                 googleDrive = GoogleDriveManager(cfgFilePath)
                 googleDrive.send_files(paths)
             else:
-                from .utils.mail import MailBook
+                from utils.mail import MailBook
                 mb = MailBook(cfgFilePath)
                 pdfPath = None
                 mobiPath = None
@@ -377,6 +400,9 @@ if __name__ == '__main__':
     except Exception as e:
         logger.error("Exception occurred {}".format(e))
         if args.report_mail:
-            from .utils.mail import MailBook
+            from utils.mail import MailBook
             mb = MailBook(cfgFilePath)
-            mb.send_info(body="Today's book grabbing has failed with exception: {}!\n Check this out!".format(str(e)))
+            mb.send_info(
+                subject=FAILURE_EMAIL_SUBJECT.format(dt.datetime.now().strftime(DATE_FORMAT)),
+                body=FAILURE_EMAIL_BODY.format(str(e))
+            )

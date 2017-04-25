@@ -62,7 +62,7 @@
   python packtPublishingFreeEbook.py -m
   ```
   
-  - SubOption *-rm* [--report_mail] - sends fail report email when script somehow failed (didn't finish succesfully)
+  - SubOption *-rm* [--report_mail] - sends fail report email whether script execution was successful
   ```
   python packtPublishingFreeEbook.py -gd -rm
   ```
