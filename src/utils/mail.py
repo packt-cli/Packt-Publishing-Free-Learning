@@ -47,8 +47,8 @@ class MailBook:
     
     def _send_email(self, msg):
         try:
-            smtp = smtplib.SMTP(host=self._smtp_host, port=self._smtp_port)
-            smtp.connect(host=self._smtp_host, port=self._smtp_port)
+            smtp = smtplib.SMTP(host=self._smtp_host, port=int(self._smtp_port))
+            smtp.connect(host=self._smtp_host, port=int(self._smtp_port))
             smtp.ehlo()
             smtp.starttls()
             smtp.ehlo()
