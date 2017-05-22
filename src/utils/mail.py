@@ -52,7 +52,11 @@ class MailBook:
             smtp.starttls()
             smtp.ehlo()
             smtp.login(self._send_from, self._email_pass)
-            logger.info('Sending email from {} to {} ...'.format(self._send_from, ','.join(self._to_emails)))
+            logger.info('Sending email with {} from {} to {} ...'.format(
+                book_name,
+                self._send_from,
+                ','.join(self._to_emails))
+            )
             smtp.sendmail(self._send_from, self._to_emails, msg.as_string())
             logger.info('Email to {} has been succesfully sent'.format(','.join(self._to_emails)))
         except Exception as e:
