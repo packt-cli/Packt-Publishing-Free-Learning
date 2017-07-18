@@ -5,6 +5,7 @@ import argparse
 import datetime as dt
 import os
 import re
+import sys
 import time
 from collections import OrderedDict
 import configparser
@@ -170,7 +171,7 @@ class BookGrabber(object):
         self._write_ebook_infodata(result_data)
         return result_data
 
-    def grab_ebook(self, log_ebook_infodata = False):
+    def grab_ebook(self, log_ebook_infodata=False):
         """Grabs the ebook"""
         logger.info("Start grabbing eBook...")
         r = self.session.get(self.account_data.freelearning_url,
@@ -201,32 +202,69 @@ class BookDownloader(object):
         self.account_data = currentSession.get_current_config()
         self.download_formats = ('pdf', 'mobi', 'epub', 'code')
 
+    def get_ebook_data(self, element):
+
+        def ebook_title(element):
+            try:
+                text = element.find('div', {'class': 'title'}).getText()
+                return re.fullmatch('\s*(.+?)(\s*\[eBook\])?\s*', text, flags=re.IGNORECASE).group(1)
+            except AttributeError:
+                raise ValueError('Couldn\'t parse book title from given HTML.')
+
+        def ebook_author(element):
+            try:
+                return element.find('div', {'class': 'author'}).getText().strip()
+            except (AttributeError, IndexError):
+                raise ValueError('Couldn\'t parse author name(s) from given HTML.')
+
+        def ebook_order_date(element):
+            reference_table = element.find('table', {'class': 'product-reference-table'})
+            text = reference_table.findAll('tr')[-1].findAll('td')[-1].getText().strip()
+            try:
+                return dt.datetime.strptime(text, '%d %B %Y')
+            except (AttributeError, ValueError):
+                raise ValueError('Couldn\'t parse e-book order date from given HTML.')
+
+        def ebook_download_urls(element):
+            def process_urls(urls):
+                for url in urls:
+                    match = re.fullmatch('/ebook_download/\d+/(.+?)', url)
+                    if match:
+                        yield match.group(1), url
+                    elif re.fullmatch('/code_download/\d+', url):
+                        yield 'code', url
+                    else:
+                        continue
+
+            urls = [a.get('href') for a in element.find_all('a')]
+            return {key: self.account_data.packtpub_url + url for key, url in process_urls(urls)}
+
+        try:
+            return {
+                'title': ebook_title(element),
+                'author': ebook_author(element),
+                'order_date': ebook_order_date(element),
+                'download_urls': ebook_download_urls(element)
+            }
+        except ValueError:
+            logger.error('Couldn\'t parse e-book data. Skipping current e-book data parsing...')
+
     def get_my_all_books_data(self):
         """Gets data from all available ebooks"""
-        logger.info("Getting data of all your books...")
-        r = self.session.get(self.account_data.my_books_url,
-                             headers=self.account_data.req_headers, timeout=10)
-        if r.status_code is not 200:
-            message = "Cannot open {}, http GET status code != 200".format(self.account_data.my_books_url)
+        logger.info('Getting data of all your books...')
+        response = self.session.get(
+            self.account_data.my_books_url,
+            headers=self.account_data.req_headers,
+            timeout=10
+        )
+        if response.status_code is not 200:
+            message = 'Cannot open {}, http GET status code != 200'.format(self.account_data.my_books_url)
             logger.error(message)
             raise requests.exceptions.RequestException(message)
-        logger.info("Opened '{}' successfully!".format(self.account_data.my_books_url))
+        logger.info('Opened \'{}\' successfully!'.format(self.account_data.my_books_url))
 
-        self.book_data = []
-        my_books_html = BeautifulSoup(r.text, 'html.parser')
-        all = my_books_html.find_all('div', {'class': 'product-line'})
-        for line in all:
-            if not line.get('nid'):
-                continue
-            title = line.find('div', {'class': 'title'}).getText().strip(' ').replace(' [eBook]',
-                                                                                      '')  # remove '[eBook]' from the title
-            download_urls = {}
-            for a in line.find_all('a'):
-                url = a.get('href')
-                for fm in self.download_formats:
-                    if url.find(fm) != -1:
-                        download_urls[fm] = url
-            self.book_data.append({'title': title, 'download_urls': download_urls})
+        all_books = BeautifulSoup(response.text, 'html.parser').find_all('div', {'class': 'product-line', 'nid': True})
+        self.book_data = list(filter(None, (self.get_ebook_data(div) for div in all_books)))
 
     def download_books(self, titles=None, formats=None, into_folder=False):
         """
@@ -240,8 +278,8 @@ class BookDownloader(object):
             if formats is None:
                 formats = self.download_formats
         if titles is not None:
-            temp_book_data = [data for data in self.book_data \
-                              if any(PacktAccountDataModel.convert_book_title_to_valid_string(data['title']) == \
+            temp_book_data = [data for data in self.book_data
+                              if any(PacktAccountDataModel.convert_book_title_to_valid_string(data['title']) ==
                                      PacktAccountDataModel.convert_book_title_to_valid_string(title) for title in
                                      titles)]
         else:  # download all
@@ -252,13 +290,10 @@ class BookDownloader(object):
         is_interactive = sys.stdout.isatty()
         for i, book in enumerate(temp_book_data):
             for form in formats:
-                if form in list(temp_book_data[i]['download_urls'].keys()):
-                    if form == 'code':
-                        file_type = 'zip'
-                    else:
-                        file_type = form
+                if form in list(book['download_urls']):
+                    file_type = 'zip' if form == 'code' else form
                     title = PacktAccountDataModel.convert_book_title_to_valid_string(
-                        temp_book_data[i]['title'])  # format valid pathname
+                        book['title'])  # format valid pathname
                     logger.info("Title: '{}'".format(title))
                     if into_folder:
                         target_download_path = os.path.join(self.account_data.download_folder_path, title)
@@ -266,8 +301,7 @@ class BookDownloader(object):
                             os.mkdir(target_download_path)
                     else:
                         target_download_path = os.path.join(self.account_data.download_folder_path)
-                    full_file_path = os.path.join(target_download_path,
-                                                  "{}.{}".format(title, file_type))
+                    full_file_path = os.path.join(target_download_path, "{}.{}".format(title, file_type))
                     if os.path.isfile(full_file_path):
                         logger.info("'{}.{}' already exists under the given path".format(title, file_type))
                     else:
@@ -277,8 +311,11 @@ class BookDownloader(object):
                             logger.info("Downloading eBook: '{}' in .{} format...".format(title, form))
                         try:
                             r = self.session.get(
-                                self.account_data.packtpub_url + temp_book_data[i]['download_urls'][form],
-                                headers=self.account_data.req_headers, timeout=100, stream=True)
+                                book['download_urls'][form],
+                                headers=self.account_data.req_headers,
+                                timeout=100,
+                                stream=True
+                            )
                             if r.status_code is 200:
                                 with open(full_file_path, 'wb') as f:
                                     total_length = int(r.headers.get('content-length'))
