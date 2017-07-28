@@ -178,7 +178,7 @@ class BookGrabber(object):
         if r.status_code is not 200:
             raise requests.exceptions.RequestException("http GET status code != 200")
         html = BeautifulSoup(r.text, 'html.parser')
-        claim_url = html.find(attrs={'class': 'twelve-days-claim'})['href']
+        claim_url = html.find('form', id='free-learning-form').get('action')
         self.book_title = PacktAccountDataModel.convert_book_title_to_valid_string(html.find('div', {'class': 'dotd-title'}).find('h2').next_element)
         r = self.session.get(self.account_data.packtpub_url + claim_url,
                              headers=self.account_data.req_headers, timeout=10)
