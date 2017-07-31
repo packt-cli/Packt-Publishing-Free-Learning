@@ -2,14 +2,16 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import argparse
+from collections import OrderedDict
+import configparser
 import datetime as dt
 import os
 import re
+import sys
 import time
-from collections import OrderedDict
-import configparser
-import requests
+
 from bs4 import BeautifulSoup
+import requests
 
 from utils import *
 
