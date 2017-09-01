@@ -12,6 +12,7 @@ import configparser
 import requests
 from bs4 import BeautifulSoup
 from python_anticaptcha import AnticaptchaClient, NoCaptchaTaskProxylessTask
+from six.moves.urllib.parse import urljoin
 
 from utils import *
 
@@ -160,8 +161,8 @@ class BookGrabber(object):
         r = self.session.get(PACKTPUB_FREE_LEARNING_URL, timeout=10)
         result_html = BeautifulSoup(r.text, 'html.parser')
         last_grabbed_book = result_html.find('div', {'class': 'dotd-main-book-image'})
-        book_url = last_grabbed_book.find('a').attrs['href']
-        book_page = self.session.get(PACKTPUB_URL + book_url, timeout=10).text
+        book_url = urljoin(PACKTPUB_URL, last_grabbed_book.find('a').attrs['href'])
+        book_page = self.session.get(book_url, timeout=10).text
         page = BeautifulSoup(book_page, 'html.parser')
 
         result_data = OrderedDict()
@@ -171,7 +172,7 @@ class BookGrabber(object):
         result_data["author"] = author.text.strip().split("\n")[0]
         result_data["date_published"] = page.find('time').text
         code_download_url = page.find('div', {'class': 'book-top-block-code'}).find('a').attrs['href']
-        result_data["code_files_url"] = PACKTPUB_URL + code_download_url
+        result_data["code_files_url"] = urljoin(PACKTPUB_URL, code_download_url)
         result_data["downloaded_at"] = time.strftime("%d-%m-%Y %H:%M")
         logger.success("Info data retrieved for '{}'".format(self.book_title))
         self._write_ebook_infodata(result_data)
@@ -216,13 +217,13 @@ class BookGrabber(object):
             raise requests.exceptions.RequestException(message)
 
     def claim_ebook_captchaless(self, html):
-        claim_url = html.find(attrs={'class': 'twelve-days-claim'})['href']
-        return self.session.get(PACKTPUB_URL + claim_url, timeout=10)
+        claim_url = urljoin(PACKTPUB_URL, html.find(attrs={'class': 'twelve-days-claim'})['href'])
+        return self.session.get(claim_url, timeout=10)
 
     def claim_ebook_captchafull(self, html):
-        claim_url = html.select_one('.free-ebook form')['action']
+        claim_url = urljoin(PACKTPUB_URL, html.select_one('.free-ebook form')['action'])
         return self.session.post(
-            PACKTPUB_URL + claim_url,
+            claim_url,
             timeout=10,
             data={'g-recaptcha-response': self.solve_captcha(PACKTPUB_FREE_LEARNING_URL, html)}
         )
@@ -311,7 +312,7 @@ class BookDownloader(object):
                             logger.info("Downloading eBook: '{}' in .{} format...".format(title, form))
                         try:
                             r = self.session.get(
-                                PACKTPUB_URL + temp_book_data[i]['download_urls'][form],
+                                urljoin(PACKTPUB_URL, temp_book_data[i]['download_urls'][form]),
                                 timeout=100,
                                 stream=True
                             )
