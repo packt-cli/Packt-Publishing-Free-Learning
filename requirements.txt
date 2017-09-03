@@ -1,5 +1,7 @@
-requests
-beautifulsoup4==4.5.1
-future
-wheel==0.24.0
-configparser
+apiclient==1.0.3
+beautifulsoup4==4.6.0
+future==0.16.0
+httplib2==0.10.3
+oauth2client==4.1.2
+requests==2.18.4
+six==1.10.0

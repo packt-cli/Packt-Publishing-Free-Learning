@@ -2,16 +2,17 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import argparse
+from collections import OrderedDict
 import datetime as dt
 import logging
 import os
 import re
 import sys
 import time
-from collections import OrderedDict
-import configparser
-import requests
+
 from bs4 import BeautifulSoup
+import requests
+from six.moves import configparser
 
 from utils.anticaptcha import Anticaptcha, AnticaptchaException
 from utils.logger import get_logger
@@ -88,7 +89,7 @@ class PacktPublishingFreeEbook(object):
     """Contains some methods to claim, download or send a free daily ebook"""
 
     download_formats = ('pdf', 'mobi', 'epub', 'code')
-    session = None   
+    session = None
 
     def __init__(self, cfg):
         self.cfg = cfg

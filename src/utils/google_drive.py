@@ -1,6 +1,3 @@
-
-import argparse
-import configparser
 import io
 import logging
 import os
@@ -11,6 +8,7 @@ from apiclient.http import MediaFileUpload, MediaIoBaseDownload
 import httplib2
 from oauth2client import client, tools
 from oauth2client.file import Storage
+from six.moves import configparser
 
 from .logger import get_logger
 
