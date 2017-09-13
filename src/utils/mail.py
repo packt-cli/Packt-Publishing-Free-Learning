@@ -1,11 +1,12 @@
-import os
-import configparser
-import smtplib
-from os.path import basename
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
+import os
+from os.path import basename
+import smtplib
+
+from six.moves import configparser
 
 from .logger import get_logger
 
