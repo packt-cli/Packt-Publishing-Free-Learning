@@ -8,6 +8,10 @@ logger = get_logger(__name__)
 class AnticaptchaException(Exception):
     pass
 
+class TransientError(Exception):
+    """Transient Error during anticaptcha, retry later"""
+    pass
+
 
 class Anticaptcha(object):
     """
@@ -17,11 +21,23 @@ class Anticaptcha(object):
     api_url = 'https://api.anti-captcha.com'
     create_task_url = api_url + '/createTask'
     get_task_result_url = api_url + '/getTaskResult'
+    get_queue_stat_url = api_url + '/getQueueStats'
     timeout_time_sec = 60  # timeout
+    # max duration for execution is 5 min or 300 seconds
+    max_retry        = 30  # Number max of retry for transient errors
+    sleep_time       = 10 # Number of seconds to wait before retrying
 
     def __init__(self, api_key):
         self.api_key = api_key
         self.session = requests.Session()
+    
+    def __get_queue_stat(self):
+        content = {
+            'queueId': 1
+        }
+        response = self.__post_request(self.get_queue_stat_url, json=content)
+        logger.info('ServerStats [{0}]'.format(response))
+
 
     def __post_request(self, url, **kwargs):
         response = self.session.post(url, **kwargs).json()
@@ -31,7 +47,17 @@ class Anticaptcha(object):
                 response.get('errorDescription')
             ))
         return response
-
+    
+    def __post_request_task(self, url, **kwargs):
+        self.__get_queue_stat()
+        response = self.session.post(url, **kwargs).json()
+        if response.get('errorId'):
+            error_code=response.get('errorCode')
+            error_description=response.get('errorDescription')
+            if ( not (error_code.find("ERROR_NO_SLOT_AVAILABLE") != -1  or  error_code.find("ERROR_INCORRECT_SESSION_DATA") != -1 ) ):
+                raise AnticaptchaException("Error [{0}] occured: [{1}]".format(error_code,error_description))
+        return response
+    
     def __create_noproxy_task(self, website_url, website_key):
         content = {
             'clientKey': self.api_key,
@@ -41,7 +67,23 @@ class Anticaptcha(object):
                 "websiteKey": website_key
             }
         }
-        response = self.__post_request(self.create_task_url, json=content)
+        
+        # Check if response is a transient error if yes try to submit it again.
+        for x in range(0, self.max_retry):
+            logger.info('Try to start anticaptcha session [{0}/{1}]'.format(x,self.max_retry))
+            response = self.__post_request_task(self.create_task_url, json=content)
+            if response.get('errorId'):
+                error_code=response.get('errorCode')
+                error_description=response.get('errorDescription')
+                if ( not (error_code.find("ERROR_NO_SLOT_AVAILABLE") != -1  or  error_code.find("ERROR_INCORRECT_SESSION_DATA") != -1 ) ):
+                    raise AnticaptchaException("Error [{0}] occured: [{1}]".format(error_code,error_description))
+                else:
+                    logger.warn('transient error[{0}] message [{1}]'.format(error_code,error_description))
+                    logger.warn('Wait [{0}] seconds before retry'.format(self.sleep_time))
+            else:
+                return response.get('taskId')
+            time.sleep(self.sleep_time)     
+           
         return response.get('taskId')
 
     def __wait_for_task_result(self, task_id):
