@@ -17,7 +17,7 @@ class Anticaptcha(object):
     api_url = 'https://api.anti-captcha.com'
     create_task_url = api_url + '/createTask'
     get_task_result_url = api_url + '/getTaskResult'
-    timeout_time_sec = 60  # timeout
+    timeout_time_sec = 120  # timeout
 
     def __init__(self, api_key):
         self.api_key = api_key
