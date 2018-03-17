@@ -60,20 +60,20 @@ class GoogleDriveManager(object):
         credential_dir = os.path.join(home_dir, '.credentials')
         if not os.path.exists(credential_dir):
             os.makedirs(credential_dir)
-        credential_path = os.path.join(credential_dir, self.app_name+'.json')
+        credential_path = os.path.join(credential_dir, '{}.json'.format(self.app_name))
         store = Storage(credential_path)
         credentials = store.get()
         if not credentials or credentials.invalid:
-            flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+            flow = client.flow_from_clientsecrets(os.path.join(home_dir, CLIENT_SECRET_FILE), SCOPES)
             flow.user_agent = self.app_name
             parser = argparse.ArgumentParser(
                 description=__doc__,
                 formatter_class=argparse.RawDescriptionHelpFormatter,
                 parents=[tools.argparser]
             )
-            flags = parser.parse_args(sys.argv[2:])
+            flags = parser.parse_args(sys.argv[4:])
             credentials = tools.run_flow(flow, store, flags)
-            logger.success('Storing credentials to ' + credential_path)
+            logger.success('Storing credentials to {}'.format(credential_path))
         return credentials
 
     def __find_folder_or_file_by_name(self, file_name, parent_id=None):

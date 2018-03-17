@@ -1,193 +1,173 @@
 [![Build Status](https://travis-ci.org/luk6xff/Packt-Publishing-Free-Learning.svg?branch=master)](https://travis-ci.org/igbt6/Packt-Publishing-Free-Learning)
 
-## Free Learning PacktPublishing script
+## Free Learning Packt Publishing script
 
-**packtPublishingFreeEbook.py** - script that automatically grabs and download a daily free eBook from https://www.packtpub.com/packt/offers/free-learning
-  You can use it also to download the already claimed eBooks from your account https://www.packtpub.com/account/my-ebooks
+`packt-cli` is a Python script that allows to automatically grab and download a daily Free
+Learning Packt ebook from https://www.packtpub.com/packt/offers/free-learning.
+You can also use it to download already claimed ebooks from your Packt
+account.
 
-The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass the Recaptcha captcha to function fully automatically. Anticaptcha.com employs people to solve captcha test use whether or not the user is human. The service costs about $ 2 per thousand captcha test, allowing you to operate for a few dollars over the years.
+The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass
+the Recaptcha captcha to function fully automatically. Anti Captcha employs
+people to solve captcha tests. The service costs about $2 per thousand captcha
+test, allowing you to operate for a few dollars over the years.
 
-### Requirements:
-* Install either Python 2.7 or 3.x
-* Install pip (if you have not installed it yet).
-  To install pip, download:  https://bootstrap.pypa.io/get-pip.py ,
-  then run the following command:
+### Installation
 
-  ```  
-  python get-pip.py
-  ```
-* Optionally install [*virtualenv*](http://docs.python-guide.org/en/latest/dev/virtualenvs/) (pip install virtualenv)
+To install script simply run
+```
+pip install git+https://github.com/luk6xff/Packt-Publishing-Free-Learning.git@master
+```
 
-* Once pip has been installed, run the following command:
-  ```
-  pip install -r requirements.txt
-  ```
+You may want to install it inside new [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
 
-* change a name of **configFileTemplate.cfg** to **configFile.cfg**  
-* change your login credentials in **configFile.cfg** file
-* register on [anti-captcha.com](https://anti-captcha.com/), grab API key and put in **configFile.cfg**
+### Usage
 
-### Usage:
-1. The script **[packtPublishingFreeEbook.py]** might be fired up with one of 7 arguments:
+The `packt-cli` script might be executed with several optional arguments.
 
-  - Option *-g* [--grab] - claims (grabs) a daily eBook into your account
-  ```
-  python packtPublishingFreeEbook.py -g
-  ```
+- Option *-g* [--grab] - claims (grabs) a daily eBook into your account
+```
+packt-cli -g
+```
 
-  - Option *-gl* [--grabl] - claims (grabs) a daily eBook into your account and save book info to log file specified in config file
-  ```
-  python packtPublishingFreeEbook.py -gl
-  ```
+- Option *-gd* [--grabd] - claims (grabs) a daily ebook and downloads the title afterwards to the location specified under *[download_folder_path]* field (configFile.cfg file)
+```
+packt-cli -gd
+```
 
-  - Option *-gd* [--grabd] - claims (grabs) a daily ebook and downloads the title afterwards to the location specified under *[download_folder_path]* field (configFile.cfg file)
-  ```
-  python packtPublishingFreeEbook.py -gd
-  ```
+- Option *-da* [--dall] - downloads all ebooks from your account
+```
+packt-cli -da
+```
 
-  - Option *-da* [--dall] - downloads all ebooks from your account
-  ```
-  python packtPublishingFreeEbook.py -da
-  ```
+- Option *-sgd* [--sgd] - claims and uploads a book to *[gdFolderName]* folder onto Google Drive (more about that in Google Drive API Setup section)
+```
+packt-cli -sgd
+```
 
-  - Option *-sgd* [--sgd] - claims and uploads a book to *[gdFolderName]* folder onto Google Drive (more about setup Google Drive api in GOOGLE_DRIVE_API Setup)  
-  ```
-  python packtPublishingFreeEbook.py -sgd
-  ```
+- Option *-m* [--mail] - claims and sends an email with the newest book in PDF format (and MOBI if is also downloaded; see mail options confguration under [MAIL] path in *configFile.cfg*)
+```
+packt-cli -m
+```
 
-  - Option *-m* [--mail] - claims and sends an email with the newest book in PDF format (and MOBI if is also downloaded; see mail options confguration under [MAIL] path in *configFile.cfg*)
-  ```
-  python packtPublishingFreeEbook.py -m
-  ```
+- SubOption *-sm* [--status_mail] - sends fail report email whether script execution was successful
+```
+packt-cli -gd -sm
+```
 
-  - SubOption *-sm* [--status_mail] - sends fail report email whether script execution was successful
-  ```
-  python packtPublishingFreeEbook.py -gd -sm
-  ```
+- SubOption *-f* [--folder] - downloads an ebook into a created folder, named as ebook's title
+```
+packt-cli -gd -f
+```
 
-  - SubOption *-f* [--folder] - downloads an ebook into a created folder, named as ebook's title
-  ```
-  python packtPublishingFreeEbook.py -gd -f
-  ```
+- SubOption *-c* [--cfgpath] - selects folder where config file can be found (default: cwd)
+```
+packt-cli -gd -c /home/usr/
+```
 
-  - SubOption *-c* [--cfgpath] - selects folder where config file can be found (default: cwd)
-  ```
-  python packtPublishingFreeEbook.py -gd -c /home/usr/
-  ```
+#### Example
 
-2. You can set the script to be invoked automatically:
+Download all ebooks in all available formats  (pdf, epub, mobi) with zipped source code file from your Packt account.
 
-  **LINUX** (tested on UBUNTU 16.04):
+To download all ebooks in all available formats from your Packt account, you have to prepare your config file as shown below:
 
-  modify access permissions of the script:
+```
+[LOGIN_DATA]
+email: youremail@youremail.com
+password: yourpassword
 
-  ```
-  $ chmod a+x packtPublishingFreeEbook.py
-  ```
+[DOWNLOAD_DATA]
+download_folder_path: C:\Users\me\Desktop\myEbooksFromPackt
+download_formats: pdf, epub, mobi, code
+ebook_extra_info_log_file_path: eBookMetadata.log
 
-  **cron** setup (more: https://help.ubuntu.com/community/CronHowto) :
+[GOOGLE_DRIVE_DATA]
+gd_app_name: GoogleDriveManager
+gd_folder_name: PACKT_EBOOKS
+```
+run:
+```
+  packt-cli -da
+```
 
-  ```
-  $ crontab -e
-  ```
+### Scheduled script execution setup
 
-  paste (modify all paths correctly according to your setup):
+#### Debian
 
-  ```
-  0 12 * * * cd /home/me/Desktop/PacktScripts/ && /usr/bin/python3 packtPublishingFreeEbook.py -gd > /home/me/Desktop/PacktScripts/packtPublishingFreeEbook.log 2>&1
-  ```
+On Debian (and any Debian-based Linux distribution) you may use [cron](https://help.ubuntu.com/community/CronHowto) job to schedule script execution. To do this run `crontab -e` and add the following line to crontab file.
 
-  and save the crontab file. To verify if CRON fires up the script correctly, run a command:
+```
+0 12 * * * path/to/virtualenv/bin/packt-cli -gd > path/to/log/file 2>&1
+```
 
-  ```
-  $ sudo grep CRON /var/log/syslog
-  ```
+Adjust execution time and paths according to your setup. To verify if cron executes the script as expected, run
+```
+$ sudo grep CRON /var/log/syslog
+```
 
-  **WINDOWS** (tested on win7,8,10):
+#### Windows
 
-  **schtasks.exe** setup (more info: https://technet.microsoft.com/en-us/library/cc725744.aspx) :
+**schtasks.exe** setup (more info: https://technet.microsoft.com/en-us/library/cc725744.aspx) :
 
-  To create the task that will be called at 12:00 everyday, run the following command in **cmd** (modify all paths according to your setup):
+To create the task that will be called at 12:00 everyday, run the following command in **cmd** (modify all paths according to your setup):
 
-  ```
-  schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat" /st 12:00
-  ```
+```
+schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat" /st 12:00
+```
 
-  To check if the "grabEbookFromPacktTask" has been added to all scheduled tasks on your computer:
+To check if the "grabEbookFromPacktTask" has been added to all scheduled tasks on your computer:
 
-  ```
-  schtasks /query
-  ```
+```
+schtasks /query
+```
 
-  To run the task manually:
+To run the task manually:
 
-  ```
-  schtasks /run /tn "grabEbookFromPacktTask"
-  ```  
+```
+schtasks /run /tn "grabEbookFromPacktTask"
+```
 
-  To delete the task:
+To delete the task:
 
-  ```
-  schtasks /delete /tn "grabEbookFromPacktTask"
-  ```
+```
+schtasks /delete /tn "grabEbookFromPacktTask"
+```
 
-  If you want to log all downloads add -l switch to grabEbookFromPacktTask i.e.
-  ```
-  schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat -l" /st 12:00
-  ```
+If you want to log all downloads add -l switch to grabEbookFromPacktTask i.e.
+```
+schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat -l" /st 12:00
+```
 
-  If you want to additionaly make command line windows stay open after download add -p switch i.e.
-  ```
-  schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat -l -p" /st 12:00
-  ```
+If you want to additionaly make command line windows stay open after download add -p switch i.e.
+```
+schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat -l -p" /st 12:00
+```
 
-* EXAMPLE: download all ebooks in all available formats  (pdf, epub, mobi) with zipped source code file from your Packt account
+### Google Drive API Setup
 
-  To download all ebooks in all available formats from your Packt account, you have to prepare your config file as shown below:
+Full info about the Google Drive Python API can be found [here](https://developers.google.com/drive/v3/web/quickstart/python).
 
-  **configFile.cfg** example:
-  ```
-    [LOGIN_DATA]
-    email: youremail@youremail.com
-    password: yourpassword    
-
-    [DOWNLOAD_DATA]
-    download_folder_path: C:\Users\me\Desktop\myEbooksFromPackt
-    download_formats: pdf, epub, mobi, code
-    ebook_extra_info_log_file_path: eBookMetadata.log
-
-    [GOOGLE_DRIVE_DATA]
-    gd_app_name: GoogleDriveManager
-    gd_folder_name: PACKT_EBOOKS
-  ```
-  run:
-  ```
-    python packtPublishingFreeEbook.py -da
-  ```
-
-### GOOGLE_DRIVE_API Setup:
-Full info about the Google Drive python API can be found [here](https://developers.google.com/drive/v3/web/quickstart/python)  
-
-1. Turn on the Drive API  
-  - Use [this wizard](https://console.developers.google.com/flows/enableapi?apiid=drive) to create or select a project in the Google Developers Console and automatically turn on the API. Click Continue, then Go to credentials.
-  - On the *Add credentials to your project page*, click the *Cancel* button.
-  - At the top of the page, select the OAuth consent screen tab. Select an Email address, enter a *Product name* if not already set, and click the Save button.
-  - Select the Credentials tab, click the Create credentials button and select *OAuth client ID*.
-  - Select the application type *Other*, enter the name *"GoogleDriveManager"*, and click the Create button.
-  - Click *OK* to dismiss the resulting dialog.
-  - Click the file_download (Download JSON) button to the right of the client ID.
-  - Move this file to your working directory and rename it *"client_secret.json"*
-
+1. Turn on the Google Drive API
+  - Use [this wizard](https://console.developers.google.com/flows/enableapi?apiid=drive) to create or select a project in the Google Developers Console and automatically turn on the API. Click `Continue`, then `Go to credentials`.
+  - On the `Add credentials to your project page`, click the `Cancel` button.
+  - At the top of the page, select the `OAuth consent screen` tab. Select an email address, enter a product name if not already set, and click the Save button.
+  - Select the `Credentials` tab, click the `Create credentials` button and select `OAuth client ID`.
+  - Select the application type `Other`, enter the name `GoogleDriveManager`, and click the `Create` button.
+  - Click `OK` to dismiss the resulting dialog.
+  - Click the file_download (`Download JSON`) button to the right of the client ID.
+  - Move this file next to the config file and rename it to `client_secret.json`.
 
 2. Create credentials folder:
-  - Simply, just fire up the script with *-sgd* argument; During first launch you will see a prompt in your browser asking for permissions, click then *allow*
+  - Simply, just fire up the script with `-sgd` argument; During first launch you will see a prompt in your browser asking for permissions, click then *allow*
   ```
-  python packtPublishingFreeEbook.py -sgd
-  ```  
-  - Or if you're unable to launch browser locally (e.g. you're connecting through SSH without X11 forwarding) use this command once, follow instructions and give permission and later you can use normal command (without *--noauth_local_webserver*).
+  packt-cli -sgd
   ```
-  python packtPublishingFreeEbook.py -sgd --noauth_local_webserver
-  ```  
+  - Or if you're unable to launch browser locally (e.g. you're connecting through SSH without X11 forwarding) use this command once, follow instructions and give permission and later you can use normal command (without `--noauth_local_webserver`).
+  ```
+  packt-cli -c /path/to/config/file.cfg -sgd --noauth_local_webserver
+  ```
+  The command parameters number and their order is important!
+
 3. Already done!
   - Run the same command as above to claim and upload the eBook to Google Drive.
 
