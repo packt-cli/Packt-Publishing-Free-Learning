@@ -110,7 +110,7 @@ The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass 
   To create the task that will be called at 12:00 everyday, run the following command in **cmd** (modify all paths according to your setup):
 
   ```
-  schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat" /st 12:00
+  schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "powershell.exe cd path/to/the/repo/src && path/to/virtualenv/bin/python packtPublishingFreeEbook.py -gd" /st 12:00
   ```
 
   To check if the "grabEbookFromPacktTask" has been added to all scheduled tasks on your computer:
@@ -131,19 +131,10 @@ The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass 
   schtasks /delete /tn "grabEbookFromPacktTask"
   ```
 
-  If you want to log all downloads add -l switch to grabEbookFromPacktTask i.e.
+  If you want to log all downloads redirect script output to the file.
   ```
-  schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat -l" /st 12:00
+  schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "powershell.exe cd path/to/the/repo/src && path/to/virtualenv/bin/python packtPublishingFreeEbook.py -gd >> packtPublishingFreeEbook.log 2>&1" /st 12:00
   ```
-
-  If you want to additionaly make command line windows stay open after download add -p switch i.e.
-  ```
-  schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat -l -p" /st 12:00
-  ```
-
-* EXAMPLE: download all ebooks in all available formats  (pdf, epub, mobi) with zipped source code file from your Packt account
-
-  To download all ebooks in all available formats from your Packt account, you have to prepare your config file as shown below:
 
   **configFile.cfg** example:
   ```
