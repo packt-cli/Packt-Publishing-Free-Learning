@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import argparse
 import datetime as dt
+from dateutil.parser import parse
 import logging
 import os
 import re
@@ -19,7 +20,9 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 logging.getLogger("requests").setLevel(logging.WARNING)  # downgrading logging level for requests
 
-DATE_FORMAT = "%Y/%m/%d"
+DATE_FORMAT = '%Y/%m/%d'
+
+BEGINNING_OF_TIME = '1970/01/01'
 
 SUCCESS_EMAIL_SUBJECT = "{} New free Packt ebook: \"{}\""
 SUCCESS_EMAIL_BODY = "A new free Packt ebook \"{}\" was successfully grabbed. Enjoy!"
@@ -203,7 +206,15 @@ class PacktPublishingFreeEbook(object):
                 for fm in self.download_formats:
                     if url.find(fm) != -1:
                         download_urls[fm] = url
-            self.book_data.append({'title': title, 'download_urls': download_urls})
+            order_date = parse(
+                line.find('table', {'class': 'product-reference-table'})
+                    .find_all('td')[-1].getText().strip()
+            ).date()
+            self.book_data.append({
+                'title': title,
+                'download_urls': download_urls,
+                'order_date': order_date
+            })
 
     @login_required
     def grab_ebook(self, log_ebook_infodata=False):
@@ -233,7 +244,7 @@ class PacktPublishingFreeEbook(object):
             raise requests.exceptions.RequestException(message)
 
     @login_required
-    def download_books(self, titles=None, formats=None, into_folder=False):
+    def download_books(self, titles=None, formats=None, into_folder=False, date_from=None, date_to=None):
         """
         Downloads the ebooks.
         :param titles: list('C# tutorial', 'c++ Tutorial') ;
@@ -251,7 +262,9 @@ class PacktPublishingFreeEbook(object):
                                      ConfigurationModel.convert_book_title_to_valid_string(title) for title in
                                      titles)]
         else:  # download all
-            temp_book_data = self.book_data
+            temp_book_data = [x for x in self.book_data if date_from <= x['order_date'] <= date_to]\
+                if date_from or date_to else self.book_data
+
         if len(temp_book_data) == 0:
             logger.info("There is no books with provided titles: {} at your account!".format(titles))
         nr_of_books_downloaded = 0
@@ -337,8 +350,16 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument("-da", "--dall", help="downloads all ebooks from your account",
                         action="store_true")
-    parser.add_argument("-dc", "--dchosen", help="downloads chosen titles described in [download_book_titles] field",
-                        action="store_true")
+    parser.add_argument(
+        '--date_from',
+        help='download all books grabbed after this date (inclusive, YYYY/MM/DD format)',
+        default=None
+    )
+    parser.add_argument(
+        '--date_to',
+        help='download all books grabbed before this date (inclusive, YYYY/MM/DD format)',
+        default=None
+    )
     parser.add_argument("-sgd", "--sgd", help="sends the grabbed eBook to google drive",
                         action="store_true")
     parser.add_argument("-m", "--mail", help="send download to emails defined in config file", default=False,
@@ -378,11 +399,12 @@ if __name__ == '__main__':
                 )
 
         # Download book(s) into proper location
-        if args.grabd or args.dall or args.dchosen or args.sgd or args.mail:
+        if args.grabd or args.dall or args.sgd or args.mail:
             if args.dall:
-                ebook.download_books(into_folder=into_folder)
-            elif args.dchosen:
-                ebook.download_books(cfg.download_book_titles, into_folder=into_folder)
+                date_from = dt.datetime.strptime(args.date_from or BEGINNING_OF_TIME, DATE_FORMAT).date()
+                date_to = dt.datetime.strptime(args.date_to, DATE_FORMAT).date()\
+                    if args.date_to else (dt.date.today() + dt.timedelta(days=1))
+                ebook.download_books(into_folder=into_folder, date_from=date_from, date_to=date_to)
             elif args.grabd:
                 ebook.download_books([ebook.book_title], into_folder=into_folder)
             else:
@@ -392,9 +414,8 @@ if __name__ == '__main__':
         # Send downloaded book(s) by mail or to google_drive
         if args.sgd or args.mail:
             paths = [
-                os.path.join(cfg.download_folder_path, path)
-                for path in os.listdir(cfg.download_folder_path)
-                if os.path.isfile(path) and ebook.book_title in path
+                os.path.abspath(x) for x in os.listdir(cfg.download_folder_path)
+                if os.path.isfile(x) and ebook.book_title in x
             ]
             if args.sgd:
                 from utils.google_drive import GoogleDriveManager
