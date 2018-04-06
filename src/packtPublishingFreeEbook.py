@@ -12,8 +12,8 @@ from collections import OrderedDict
 import configparser
 import requests
 from bs4 import BeautifulSoup
+from python_anticaptcha import AnticaptchaClient, NoCaptchaTaskProxylessTask
 
-from utils.anticaptcha import Anticaptcha
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -134,8 +134,13 @@ class PacktPublishingFreeEbook(object):
     def __claim_ebook_captchafull(self, url, html):
         key_pattern = re.compile("Packt.offers.onLoadRecaptcha\(\'(.+?)\'\)")
         website_key = key_pattern.search(html.find(text=key_pattern)).group(1)
-        anticaptcha = Anticaptcha(self.cfg.anticaptcha_clientkey)
-        captcha_solved_id = anticaptcha.solve_recaptcha(url, website_key)
+
+        client = AnticaptchaClient(self.cfg.anticaptcha_clientkey)
+        task = NoCaptchaTaskProxylessTask(url, website_key)
+        job = client.createTask(task)
+        job.join()
+        captcha_solved_id = job.get_solution_response()
+
         claim_url = html.select_one('.free-ebook form')['action']
         return self.session.post(self.cfg.packtpub_url + claim_url,
                                  timeout=10,
