@@ -28,7 +28,7 @@ The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass 
 * register on [anti-captcha.com](https://anti-captcha.com/), grab API key and put in **configFile.cfg**
 
 ### Usage:
-1. The script **[packtPublishingFreeEbook.py]** might be fired up with one of 7 arguments:
+1. The script **[packtPublishingFreeEbook.py]** might be fired up with several arguments:
 
   - Option *-g* [--grab] - claims (grabs) a daily eBook into your account
   ```
@@ -49,10 +49,15 @@ The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass 
   ```
   python packtPublishingFreeEbook.py -da
   ```
-  
-  - Option *-dc* [--dchosen] - downloads chosen titles specified under *[download_book_titles]* field in *configFile.cfg*
+
+  - SubOption *--date_from* - downloads all books grabbed after this date (inclusive, YYYY/MM/DD format)
   ```
-  python packtPublishingFreeEbook.py -dc
+  python packtPublishingFreeEbook.py -da --date_from=2018/03/19 --date_to=2018/03/20
+  ```
+
+  - SubOption *--date-to* - downloads all books grabbed before this date (inclusive, YYYY/MM/DD format)
+  ```
+  python packtPublishingFreeEbook.py -da --date_from=2018/03/19 --date_to=2018/03/20
   ```
 
   - Option *-sgd* [--sgd] - claims and uploads a book to *[gdFolderName]* folder onto Google Drive (more about setup Google Drive api in GOOGLE_DRIVE_API Setup)  
@@ -146,9 +151,9 @@ The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass 
   schtasks /create /sc DAILY /tn "grabEbookFromPacktTask" /tr "C:\Users\me\Desktop\GrabPacktFreeBook\grabEbookFromPacktTask.bat -l -p" /st 12:00
   ``` 
 
-* EXAMPLE: download **'Unity 4.x Game AI Programming'** and  **'Multithreading in C# 5.0 Cookbook'** books in all available formats  (pdf, epub, mobi) with zipped source code file from your packt account
+* EXAMPLE: download all ebooks in all available formats (pdf, epub, mobi) with zipped source code file from your packt account
   
-  To download chosen titles from your account, you must put them into **download_book_titles** in **configFile.cfg** as shown below:
+  To download all titles from your account prepare your **configFile.cfg** as shown below:
   
   **configFile.cfg** example:
   ```
@@ -159,7 +164,6 @@ The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass 
     [DOWNLOAD_DATA]
     download_folder_path: C:\Users\me\Desktop\myEbooksFromPackt
     download_formats: pdf, epub, mobi, code
-    download_book_titles: Unity 4.x Game AI Programming , Multithreading in C# 5.0 Cookbook
     ebook_extra_info_log_file_path: eBookMetadata.log
     
     [GOOGLE_DRIVE_DATA]
@@ -168,7 +172,7 @@ The script uses [anti-captcha.com](https://anti-captcha.com/) service to bypass 
   ```
   run:
   ```
-    python packtPublishingFreeEbook.py -dc
+    python packtPublishingFreeEbook.py -da
   ```
 
 ### GOOGLE_DRIVE_API Setup:
