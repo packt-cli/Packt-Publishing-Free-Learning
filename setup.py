@@ -3,7 +3,6 @@ from setuptools import find_packages, setup
 package_version = '1.0.0'
 
 requirements = [
-    'beautifulsoup4==4.6.3',
     'click==7.0',
     'google-api-python-client==1.6.3',
     'requests==2.20.0',

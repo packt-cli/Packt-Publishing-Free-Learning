@@ -4,11 +4,9 @@ from itertools import chain
 import logging
 from math import ceil
 import os
-import re
 import sys
 import configparser
 
-from bs4 import BeautifulSoup
 import requests
 from requests.exceptions import ConnectionError
 from slugify import slugify
@@ -37,11 +35,8 @@ SUCCESS_EMAIL_BODY = "A new free Packt ebook \"{}\" was successfully grabbed. En
 FAILURE_EMAIL_SUBJECT = "{} Grabbing a new free Packt ebook failed"
 FAILURE_EMAIL_BODY = "Today's free Packt ebook grabbing has failed with exception: {}!\n\nCheck this out!"
 
-USER_AGENT_HEADER = {
-    'User-Agent':
-    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'
-}
 PACKT_FREE_LEARNING_URL = 'https://www.packtpub.com/packt/offers/free-learning/'
+PACKT_RECAPTCHA_SITE_KEY = '6LeAHSgUAAAAAKsn5jo6RUSTLVxGNYyuvUcLMe0_'
 
 
 def slugify_book_title(title):
@@ -125,16 +120,10 @@ class PacktPublishingFreeEbook(object):
             logger.error('Couldn\'t fetch page {} of user\'s books data.'.format(page))
 
     def solve_packt_recapcha(self):
-        """Open Packt Free Learning website and solve ReCAPTCHA from this site."""
-        response = requests.get(PACKT_FREE_LEARNING_URL, headers=USER_AGENT_HEADER)
-        html = BeautifulSoup(response.text, 'html.parser')
-
-        key_pattern = re.compile('Packt.offers.onLoadRecaptcha\(\'(.+?)\'\)')
-        website_key = key_pattern.search(html.find(text=key_pattern)).group(1)
-
+        """Solve Packt Free Learning website site ReCAPTCHA."""
         logger.info('Started solving ReCAPTCHA on Packt Free Learning website...')
         anticaptcha = Anticaptcha(self.cfg.anticaptcha_clientkey)
-        return anticaptcha.solve_recaptcha(PACKT_FREE_LEARNING_URL, website_key)
+        return anticaptcha.solve_recaptcha(PACKT_FREE_LEARNING_URL, PACKT_RECAPTCHA_SITE_KEY)
 
     def grab_ebook(self, api_client):
         """Grab Packt Free Learning ebook."""
