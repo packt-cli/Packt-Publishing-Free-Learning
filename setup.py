@@ -7,7 +7,6 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
 package_version = '1.1.0'
 
 requirements = [
-    'beautifulsoup4==4.6.3',
     'click==7.0',
     'google-api-python-client==1.6.3',
     'requests==2.20.0',
