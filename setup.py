@@ -22,7 +22,7 @@ setup(
     version=package_version,
     package_dir={'': 'src'},
     packages=find_packages('src'),
-    py_modules=['packtPublishingFreeEbook'],
+    py_modules=['packtPublishingFreeEbook', 'api'],
     install_requires=requirements,
     extras_require={'dev': dev_requirements},
     entry_points={
