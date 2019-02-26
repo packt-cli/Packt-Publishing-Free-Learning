@@ -222,6 +222,7 @@ class PacktPublishingFreeEbook(object):
                     else:
                         target_download_path = os.path.join(self.cfg.download_folder_path)
                     full_file_path = os.path.join(target_download_path, '{}.{}'.format(title, file_extention))
+                    temp_file_path = os.path.join(target_download_path, 'download.tmp')
                     if os.path.isfile(full_file_path):
                         logger.info('"{}.{}" already exists under the given path.'.format(title, file_extention))
                     else:
@@ -233,19 +234,25 @@ class PacktPublishingFreeEbook(object):
                             file_url = api_client.get(download_url).json().get('data')
                             r = api_client.get(file_url, timeout=100, stream=True)
                             if r.status_code is 200:
-                                with open(full_file_path, 'wb') as f:
-                                    total_length = int(r.headers.get('content-length'))
-                                    num_of_chunks = (total_length / 1024) + 1
-                                    for num, chunk in enumerate(r.iter_content(chunk_size=1024)):
-                                        if chunk:
-                                            if is_interactive:
-                                                PacktPublishingFreeEbook.update_download_progress_bar(
-                                                    num / num_of_chunks
-                                                )
-                                            f.write(chunk)
-                                            f.flush()
-                                    if is_interactive:
-                                        PacktPublishingFreeEbook.update_download_progress_bar(-1)  # add end of line
+                                try:
+                                    with open(temp_file_path, 'wb') as f:
+                                        total_length = int(r.headers.get('content-length'))
+                                        num_of_chunks = (total_length / 1024) + 1
+                                        for num, chunk in enumerate(r.iter_content(chunk_size=1024)):
+                                            if chunk:
+                                                if is_interactive:
+                                                    PacktPublishingFreeEbook.update_download_progress_bar(
+                                                        num / num_of_chunks
+                                                    )
+                                                f.write(chunk)
+                                                f.flush()
+                                        if is_interactive:
+                                            PacktPublishingFreeEbook.update_download_progress_bar(-1)  # add end of line
+                                    os.rename(temp_file_path, full_file_path)
+                                finally:
+                                    if os.path.isfile(temp_file_path):
+                                        os.remove(temp_file_path)
+
                                 if format == 'code':
                                     logger.success("Code for eBook: '{}' downloaded successfully!".format(title))
                                 else:
