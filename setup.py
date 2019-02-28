@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_version = '1.0.0'
+package_version = '1.0.1'
 
 requirements = [
     'beautifulsoup4==4.6.3',
