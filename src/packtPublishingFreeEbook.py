@@ -163,6 +163,7 @@ class PacktPublishingFreeEbook(object):
 
         product_response = api_client.get(PACKT_PRODUCT_SUMMARY_URL.format(product_id=product_id))
         self.book_title = product_response.json()['title'] if product_response.status_code == 200 else self.book_title
+        self.book_title = slugify_book_title(self.book_title)
 
         if claim_response.status_code == 200:
             logger.info('A new Packt Free Learning book has been grabbed!')
@@ -285,7 +286,7 @@ class PacktPublishingFreeEbook(object):
 @click.option('-sgd', '--sgd', is_flag=True, help='Grab Free Learning Packt ebook and download it to Google Drive.')
 @click.option('-m', '--mail', is_flag=True, help='Grab Free Learning Packt ebook and send it by an email.')
 @click.option('-sm', '--status_mail', is_flag=True, help='Send an email whether script execution was successful.')
-@click.option('-f', '--folder', is_flag=True, help='Download ebooks into separate directories.')
+@click.option('-f', '--folder', default=False, help='Download ebooks into separate directories.')
 @click.option(
     '--noauth_local_webserver',
     is_flag=True,
@@ -293,8 +294,9 @@ class PacktPublishingFreeEbook(object):
     help='See Google Drive API Setup section in README.'
 )
 def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth_local_webserver):
-    into_folder = folder
+    
     config_file_path = cfgpath
+    into_folder = folder
 
     try:
         cfg = ConfigurationModel(config_file_path)
@@ -324,9 +326,10 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
                 ebook.download_books(api_client, into_folder=into_folder)
             elif grabd:
                 ebook.download_books(api_client, [ebook.book_title], into_folder=into_folder)
-            else:
+            else: # sgd or mail
+                # download it temporarily to cwd
                 cfg.download_folder_path = os.getcwd()
-                ebook.download_books(api_client, [ebook.book_title], into_folder=into_folder)
+                ebook.download_books(api_client, [ebook.book_title], into_folder=False)
 
         # Send downloaded book(s) by mail or to Google Drive.
         if sgd or mail:
