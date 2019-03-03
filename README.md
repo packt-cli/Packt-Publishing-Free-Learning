@@ -14,6 +14,8 @@ test, allowing you to operate for a few dollars over the years.
 
 ### Installation
 
+You need a python version >= 3.4 installed.
+
 To install script simply run
 ```
 pip install git+https://github.com/luk6xff/Packt-Publishing-Free-Learning.git@master
