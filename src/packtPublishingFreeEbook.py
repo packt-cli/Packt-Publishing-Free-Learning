@@ -293,8 +293,7 @@ class PacktPublishingFreeEbook(object):
     default=False,
     help='See Google Drive API Setup section in README.'
 )
-def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth_local_webserver):
-    
+def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth_local_webserver):    
     config_file_path = cfgpath
     into_folder = folder
 
@@ -326,7 +325,7 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
                 ebook.download_books(api_client, into_folder=into_folder)
             elif grabd:
                 ebook.download_books(api_client, [ebook.book_title], into_folder=into_folder)
-            else: # sgd or mail
+            else:  # sgd or mail
                 # download it temporarily to cwd
                 cfg.download_folder_path = os.getcwd()
                 ebook.download_books(api_client, [ebook.book_title], into_folder=False)
