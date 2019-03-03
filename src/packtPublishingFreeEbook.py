@@ -293,7 +293,7 @@ class PacktPublishingFreeEbook(object):
     default=False,
     help='See Google Drive API Setup section in README.'
 )
-def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth_local_webserver):    
+def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth_local_webserver):
     config_file_path = cfgpath
     into_folder = folder
 
