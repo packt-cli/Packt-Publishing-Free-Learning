@@ -41,5 +41,11 @@ setup(
             'packt-cli = packtPublishingFreeEbook:packt_cli',
         ],
     },
-    download_url='https://github.com/luk6xff/Packt-Publishing-Free-Learning/archive/v1.0.4.tar.gz'
+    download_url='https://github.com/luk6xff/Packt-Publishing-Free-Learning/archive/v1.0.4.tar.gz',
+    classifiers=[
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
+    ]
 )
