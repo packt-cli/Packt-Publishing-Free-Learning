@@ -1,4 +1,8 @@
+import os
 from setuptools import find_packages, setup
+
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
+    long_description = f.read()
 
 package_version = '1.0.3'
 
@@ -25,6 +29,8 @@ setup(
     author='Łukasz Uszko',
     author_email='lukasz.uszko@gmail.com',
     url='https://github.com/luk6xff/Packt-Publishing-Free-Learning',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     package_dir={'': 'src'},
     packages=find_packages('src'),
     py_modules=['packtPublishingFreeEbook', 'api'],
