@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_version = '1.0.2'
+package_version = '1.0.3'
 
 requirements = [
     'beautifulsoup4==4.6.3',
@@ -35,5 +35,5 @@ setup(
             'packt-cli = packtPublishingFreeEbook:packt_cli',
         ],
     },
-    download_url='https://github.com/luk6xff/Packt-Publishing-Free-Learning/archive/v1.0.2.tar.gz'
+    download_url='https://github.com/luk6xff/Packt-Publishing-Free-Learning/archive/v1.0.3.tar.gz'
 )
