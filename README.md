@@ -1,3 +1,5 @@
+[![Version](https://img.shields.io/pypi/v/packt.svg)](https://pypi.org/project/packt/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/packt.svg)](https://pypi.org/project/packt/)
 [![Build Status](https://travis-ci.org/luk6xff/Packt-Publishing-Free-Learning.svg?branch=master)](https://travis-ci.org/igbt6/Packt-Publishing-Free-Learning)
 
 ## Free Learning Packt Publishing script
