@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
     long_description = f.read()
 
-package_version = '1.0.4'
+package_version = '1.0.5'
 
 requirements = [
     'beautifulsoup4==4.6.3',
@@ -41,7 +41,7 @@ setup(
             'packt-cli = packtPublishingFreeEbook:packt_cli',
         ],
     },
-    download_url='https://github.com/luk6xff/Packt-Publishing-Free-Learning/archive/v1.0.4.tar.gz',
+    download_url='https://github.com/luk6xff/Packt-Publishing-Free-Learning/archive/v1.0.5.tar.gz',
     classifiers=[
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
