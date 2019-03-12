@@ -92,7 +92,7 @@ class PacktPublishingFreeEbook(object):
 
     def __init__(self, cfg):
         self.cfg = cfg
-        self.book_title = ""
+        self.book_data = None
 
     def get_all_books_data(self, api_client):
         """Fetch all user's ebooks data."""
@@ -162,22 +162,18 @@ class PacktPublishingFreeEbook(object):
         )
 
         product_response = api_client.get(PACKT_PRODUCT_SUMMARY_URL.format(product_id=product_id))
-        self.book_title = product_response.json()['title'] if product_response.status_code == 200 else self.book_title
-        self.book_title = slugify_book_title(self.book_title)
+        self.book_data = {'id': product_id, 'title': product_response.json()['title']}\
+            if product_response.status_code == 200 else None
 
         if claim_response.status_code == 200:
-            logger.info('A new Packt Free Learning book has been grabbed!')
+            logger.info('A new Packt Free Learning ebook "{}" has been grabbed!'.format(self.book_data['title']))
         elif claim_response.status_code == 409:
-            logger.info('You have already claimed this offer.')
+            logger.info('You have already claimed Packt Free Learning "{}" offer.'.format(self.book_data['title']))
         else:
             logger.error('Claiming Packt Free Learning book has failed.')
 
-    def download_books(self, api_client, titles=None, formats=None, into_folder=False):
-        """
-        Downloads the ebooks.
-        :param titles: list('C# tutorial', 'c++ Tutorial') ;
-        :param formats: tuple('pdf','mobi','epub','code');
-        """
+    def download_books(self, api_client, product_data=None, formats=None, into_folder=False):
+        """Download selected ebooks."""
         def get_product_download_urls(product_id):
             error_message = 'Couldn\'t fetch download URLs for product {}.'.format(product_id)
             try:
@@ -193,43 +189,32 @@ class PacktPublishingFreeEbook(object):
             except Exception:
                 raise PacktConnectionError(error_message)
         # download ebook
-        my_books_data = self.get_all_books_data(api_client)
-        if formats is None:
-            formats = self.cfg.download_formats
-            if formats is None:
-                formats = self.download_formats
-        if titles is not None:
-            temp_book_data = [data for data in my_books_data
-                              if any(slugify_book_title(data['title']) ==
-                                     slugify_book_title(title) for title in
-                                     titles)]
-        else:  # download all
-            temp_book_data = my_books_data
-        if len(temp_book_data) == 0:
-            logger.info("There is no books with provided titles: {} at your account!".format(titles))
+        my_books_data = [product_data] if product_data else self.get_all_books_data(api_client)
+        formats = formats or self.cfg.download_formats or self.download_formats
+
         nr_of_books_downloaded = 0
         is_interactive = sys.stdout.isatty()
-        for book in temp_book_data:
+        for book in my_books_data:
             download_urls = get_product_download_urls(book['id'])
             for format, download_url in download_urls.items():
                 if format in formats:
                     file_extention = 'zip' if format == 'code' else format
-                    title = slugify_book_title(book['title'])
-                    logger.info("Title: '{}'".format(title))
+                    file_name = slugify_book_title(book['title'])
+                    logger.info('Title: "{}"'.format(book['title']))
                     if into_folder:
-                        target_download_path = os.path.join(self.cfg.download_folder_path, title)
+                        target_download_path = os.path.join(self.cfg.download_folder_path, file_name)
                         if not os.path.isdir(target_download_path):
                             os.mkdir(target_download_path)
                     else:
                         target_download_path = os.path.join(self.cfg.download_folder_path)
-                    full_file_path = os.path.join(target_download_path, '{}.{}'.format(title, file_extention))
+                    full_file_path = os.path.join(target_download_path, '{}.{}'.format(file_name, file_extention))
                     if os.path.isfile(full_file_path):
-                        logger.info('"{}.{}" already exists under the given path.'.format(title, file_extention))
+                        logger.info('"{}.{}" already exists under the given path.'.format(file_name, file_extention))
                     else:
                         if format == 'code':
-                            logger.info("Downloading code for eBook: '{}'...".format(title))
+                            logger.info('Downloading code for ebook: "{}"...'.format(book['title']))
                         else:
-                            logger.info("Downloading eBook: '{}' in .{} format...".format(title, format))
+                            logger.info('Downloading ebook: "{}" in {} format...'.format(book['title'], format))
                         try:
                             file_url = api_client.get(download_url).json().get('data')
                             r = api_client.get(file_url, timeout=100, stream=True)
@@ -248,17 +233,20 @@ class PacktPublishingFreeEbook(object):
                                     if is_interactive:
                                         PacktPublishingFreeEbook.update_download_progress_bar(-1)  # add end of line
                                 if format == 'code':
-                                    logger.success("Code for eBook: '{}' downloaded successfully!".format(title))
+                                    logger.success('Code for ebook "{}" downloaded successfully!'.format(book['title']))
                                 else:
-                                    logger.success("eBook: '{}.{}' downloaded successfully!".format(title, format))
+                                    logger.success('Ebook "{}" in {} format downloaded successfully!'.format(
+                                        book['title'],
+                                        format
+                                    ))
                                 nr_of_books_downloaded += 1
                             else:
-                                message = "Cannot download '{}'".format(title)
+                                message = 'Couldn\'t download "{}" ebook in {} format.'.format(book['title'], format)
                                 logger.error(message)
                                 raise requests.exceptions.RequestException(message)
                         except Exception as e:
                             logger.error(e)
-        logger.info("{} eBooks have been downloaded!".format(str(nr_of_books_downloaded)))
+        logger.info("{} ebooks have been downloaded!".format(str(nr_of_books_downloaded)))
 
     @staticmethod
     def update_download_progress_bar(current_work_done):
@@ -307,9 +295,9 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
                 mb.send_info(
                     subject=SUCCESS_EMAIL_SUBJECT.format(
                         dt.datetime.now().strftime(DATE_FORMAT),
-                        ebook.book_title
+                        ebook.book_data['title']
                     ),
-                    body=SUCCESS_EMAIL_BODY.format(ebook.book_title)
+                    body=SUCCESS_EMAIL_BODY.format(ebook.book_data['title'])
                 )
 
         # Download book(s) into proper location.
@@ -317,18 +305,18 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
             if dall:
                 ebook.download_books(api_client, into_folder=into_folder)
             elif grabd:
-                ebook.download_books(api_client, [ebook.book_title], into_folder=into_folder)
+                ebook.download_books(api_client, ebook.book_data, into_folder=into_folder)
             else:  # sgd or mail
                 # download it temporarily to cwd
                 cfg.download_folder_path = os.getcwd()
-                ebook.download_books(api_client, [ebook.book_title], into_folder=False)
+                ebook.download_books(api_client, ebook.book_data, into_folder=False)
 
         # Send downloaded book(s) by mail or to Google Drive.
         if sgd or mail:
             paths = [
                 os.path.join(cfg.download_folder_path, path)
                 for path in os.listdir(cfg.download_folder_path)
-                if os.path.isfile(path) and ebook.book_title in path
+                if os.path.isfile(path) and slugify_book_title(ebook.book_data['title']) in path
             ]
             if sgd:
                 from utils.google_drive import GoogleDriveManager
