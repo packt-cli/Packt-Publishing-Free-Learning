@@ -88,7 +88,7 @@ class ConfigurationModel(object):
 class PacktPublishingFreeEbook(object):
     """Contains some methods to claim, download or send a free daily ebook"""
 
-    download_formats = ('pdf', 'mobi', 'epub', 'code')
+    download_formats = ('pdf', 'mobi', 'epub', 'video', 'code')
 
     def __init__(self, cfg):
         self.cfg = cfg
@@ -173,7 +173,7 @@ class PacktPublishingFreeEbook(object):
             logger.error('Claiming Packt Free Learning book has failed.')
 
     def download_books(self, api_client, product_data=None, formats=None, into_folder=False):
-        """Download selected ebooks."""
+        """Download selected products."""
         def get_product_download_urls(product_id):
             error_message = 'Couldn\'t fetch download URLs for product {}.'.format(product_id)
             try:
@@ -198,7 +198,7 @@ class PacktPublishingFreeEbook(object):
             download_urls = get_product_download_urls(book['id'])
             for format, download_url in download_urls.items():
                 if format in formats:
-                    file_extention = 'zip' if format == 'code' else format
+                    file_extention = 'zip' if format in ('video', 'code') else format
                     file_name = slugify_book_title(book['title'])
                     logger.info('Title: "{}"'.format(book['title']))
                     if into_folder:
@@ -213,6 +213,8 @@ class PacktPublishingFreeEbook(object):
                     else:
                         if format == 'code':
                             logger.info('Downloading code for ebook: "{}"...'.format(book['title']))
+                        elif format == 'video':
+                            logger.info('Downloading "{}" video...'.format(book['title']))
                         else:
                             logger.info('Downloading ebook: "{}" in {} format...'.format(book['title'], format))
                         try:
