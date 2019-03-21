@@ -186,7 +186,7 @@ class PacktPublishingFreeEbook(object):
         for book in my_books_data:
             download_urls = get_product_download_urls(book['id'])
             for format, download_url in download_urls.items():
-                if format in formats:
+                if format in formats and not (format == 'code' and 'video' in download_urls and 'video' in formats):
                     file_extention = 'zip' if format in ('video', 'code') else format
                     file_name = slugify_book_title(book['title'])
                     logger.info('Title: "{}"'.format(book['title']))
