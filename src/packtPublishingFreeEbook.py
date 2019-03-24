@@ -265,7 +265,7 @@ class PacktPublishingFreeEbook(object):
 @click.option('-sgd', '--sgd', is_flag=True, help='Grab Free Learning Packt ebook and download it to Google Drive.')
 @click.option('-m', '--mail', is_flag=True, help='Grab Free Learning Packt ebook and send it by an email.')
 @click.option('-sm', '--status_mail', is_flag=True, help='Send an email whether script execution was successful.')
-@click.option('-f', '--folder', default=False, help='Download ebooks into separate directories.')
+@click.option('-f', '--folder', is_flag=True, default=False, help='Download ebooks into separate directories.')
 @click.option(
     '--noauth_local_webserver',
     is_flag=True,
