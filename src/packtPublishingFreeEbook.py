@@ -145,14 +145,18 @@ class PacktPublishingFreeEbook(object):
         [user_data] = user_response.json().get('data')
         user_id = user_data.get('id')
 
+        product_response = api_client.get(PACKT_PRODUCT_SUMMARY_URL.format(product_id=product_id))
+        self.book_data = {'id': product_id, 'title': product_response.json()['title']}\
+            if product_response.status_code == 200 else None
+
+        if any(product_id == book['id'] for book in self.get_single_page_books_data(api_client, 0)):
+            logger.info('You have already claimed Packt Free Learning "{}" offer.'.format(self.book_data['title']))
+            return
+
         claim_response = api_client.put(
             PACKT_API_FREE_LEARNING_CLAIM_URL.format(user_id=user_id, offer_id=offer_id),
             json={'recaptcha': self.solve_packt_recapcha()}
         )
-
-        product_response = api_client.get(PACKT_PRODUCT_SUMMARY_URL.format(product_id=product_id))
-        self.book_data = {'id': product_id, 'title': product_response.json()['title']}\
-            if product_response.status_code == 200 else None
 
         if claim_response.status_code == 200:
             logger.info('A new Packt Free Learning ebook "{}" has been grabbed!'.format(self.book_data['title']))
