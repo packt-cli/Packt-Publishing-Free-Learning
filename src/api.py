@@ -1,5 +1,6 @@
 """Module with Packt API client handling API's authentication."""
 import logging
+import sys
 
 import requests
 
@@ -37,7 +38,8 @@ class PacktAPIClient:
             self.session.headers.update({'authorization': 'Bearer {}'.format(jwt)})
             logger.info('JWT token has been fetched successfully!')
         except Exception:
-            logger.error('Fetching JWT token failed!')
+            logger.error('Fetching JWT token failed! Check your login credentials.')
+            sys.exit(1)
 
     def request(self, method, url, **kwargs):
         """Make a request to a Packt API."""
