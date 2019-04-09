@@ -42,7 +42,6 @@ setup(
     },
     download_url='https://github.com/luk6xff/Packt-Publishing-Free-Learning/archive/v1.2.2.tar.gz',
     classifiers=[
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7'
