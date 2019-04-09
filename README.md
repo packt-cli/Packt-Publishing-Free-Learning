@@ -18,7 +18,7 @@ test, allowing you to operate for a few dollars over the years.
 
 To install current version of script simply run
 ```
-pip install packt --upgrade
+pip3 install packt --upgrade
 ```
 
 You may want to install it inside new [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
