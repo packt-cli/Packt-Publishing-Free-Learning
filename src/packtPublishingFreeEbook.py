@@ -149,7 +149,7 @@ class PacktPublishingFreeEbook(object):
         self.book_data = {'id': product_id, 'title': product_response.json()['title']}\
             if product_response.status_code == 200 else None
 
-        if any(product_id == book['id'] for book in self.get_single_page_books_data(api_client, 0)):
+        if any(product_id == book['id'] for book in self.get_all_books_data(api_client)):
             logger.info('You have already claimed Packt Free Learning "{}" offer.'.format(self.book_data['title']))
             return
 
