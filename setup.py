@@ -32,7 +32,7 @@ setup(
     long_description_content_type='text/markdown',
     package_dir={'': 'src'},
     packages=find_packages('src'),
-    py_modules=['packtPublishingFreeEbook', 'api'],
+    py_modules=['packtPublishingFreeEbook', 'api', 'claimer', 'configuration', 'downloader'],
     install_requires=requirements,
     extras_require={'dev': dev_requirements},
     entry_points={

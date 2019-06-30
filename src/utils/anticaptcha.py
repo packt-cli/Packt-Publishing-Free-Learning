@@ -64,3 +64,9 @@ class Anticaptcha(object):
         solution = self.__wait_for_task_result(task_id)['solution']['gRecaptchaResponse']
         logger.success('Solution found for {} task.'.format(task_id))
         return solution
+
+
+def solve_recaptcha(anticaptcha_key, website_url, website_key):
+    """Solve ReCAPTCHA task for given website."""
+    anticaptcha = Anticaptcha(anticaptcha_key)
+    return anticaptcha.solve_recaptcha(website_url, website_key)
