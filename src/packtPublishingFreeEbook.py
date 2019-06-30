@@ -53,18 +53,11 @@ class ConfigurationModel(object):
     """Contains all needed urls, passwords and packtpub account data stored in .cfg file"""
 
     def __init__(self, cfg_file_path):
-        self.cfg_file_path = cfg_file_path
-        self.cfg_folder_path = os.path.dirname(cfg_file_path)
         self.configuration = configparser.ConfigParser()
-        if not self.configuration.read(self.cfg_file_path):
-            raise configparser.Error('{} file not found'.format(self.cfg_file_path))
+        self.configuration.read(cfg_file_path)
         self.anticaptcha_clientkey = self.configuration.get("ANTICAPTCHA_DATA", 'key')
         self.my_packt_email, self.my_packt_password = self._get_config_login_data()
         self.download_folder_path, self.download_formats = self._get_config_download_data()
-        if not os.path.exists(self.download_folder_path):
-            message = "Download folder path: '{}' doesn't exist".format(self.download_folder_path)
-            logger.error(message)
-            raise ValueError(message)
 
     def _get_config_login_data(self):
         """Gets user login credentials."""
@@ -75,6 +68,10 @@ class ConfigurationModel(object):
     def _get_config_download_data(self):
         """Downloads ebook data from the user account."""
         download_path = self.configuration.get("DOWNLOAD_DATA", 'download_folder_path')
+        if not os.path.exists(download_path):
+            message = "Download folder path: '{}' doesn't exist".format(download_path)
+            logger.error(message)
+            raise ValueError(message)
         download_formats = tuple(form.replace(' ', '') for form in
                                  self.configuration.get("DOWNLOAD_DATA", 'download_formats').split(','))
         return download_path, download_formats
@@ -262,7 +259,13 @@ class PacktPublishingFreeEbook(object):
 
 
 @click.command()
-@click.option('-c', '--cfgpath', default=os.path.join(os.getcwd(), 'configFile.cfg'), help='Config file path.')
+@click.option(
+    '-c',
+    '--cfgpath',
+    default=os.path.join(os.getcwd(), 'configFile.cfg'),
+    type=click.Path(exists=True),
+    help='Config file path.'
+)
 @click.option('-g', '--grab', is_flag=True, help='Grab Free Learning Packt ebook.')
 @click.option('-gd', '--grabd', is_flag=True, help='Grab Free Learning Packt ebook and download it afterwards.')
 @click.option('-da', '--dall', is_flag=True, help='Download all ebooks from your Packt account.')
