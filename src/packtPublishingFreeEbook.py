@@ -4,7 +4,7 @@ import os
 import sys
 
 from api import PacktAPIClient
-from claimer import claim_product, get_all_books_data
+from claimer import claim_product, get_all_books_data, ask_and_get_books_data
 from configuration import ConfigurationModel
 from downloader import download_products, slugify_product_name
 from utils.logger import get_logger
@@ -32,6 +32,7 @@ AVAILABLE_DOWNLOAD_FORMATS = ('pdf', 'mobi', 'epub', 'video', 'code')
 @click.option('-g', '--grab', is_flag=True, help='Grab Free Learning Packt ebook.')
 @click.option('-gd', '--grabd', is_flag=True, help='Grab Free Learning Packt ebook and download it afterwards.')
 @click.option('-da', '--dall', is_flag=True, help='Download all ebooks from your Packt account.')
+@click.option('-bs', '--book_selector', is_flag=True, help='Show all owned books and select those to download')
 @click.option('-sgd', '--sgd', is_flag=True, help='Grab Free Learning Packt ebook and download it to Google Drive.')
 @click.option('-m', '--mail', is_flag=True, help='Grab Free Learning Packt ebook and send it by an email.')
 @click.option('-sm', '--status_mail', is_flag=True, help='Send an email whether script execution was successful.')
@@ -42,7 +43,7 @@ AVAILABLE_DOWNLOAD_FORMATS = ('pdf', 'mobi', 'epub', 'video', 'code')
     default=False,
     help='See Google Drive API Setup section in README.'
 )
-def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth_local_webserver):
+def packt_cli(cfgpath, grab, grabd, dall, book_selector, sgd, mail, status_mail, folder, noauth_local_webserver):
     config_file_path = cfgpath
     into_folder = folder
 
@@ -69,7 +70,7 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
                 )
 
         # Download book(s) into proper location.
-        if grabd or dall or sgd or mail:
+        if grabd or dall or book_selector or sgd or mail:
             download_directory, formats = cfg.config_download_data
             download_directory = download_directory if (dall or grabd) else os.getcwd()  # cwd for temporary downloads
             formats = formats or AVAILABLE_DOWNLOAD_FORMATS
@@ -80,6 +81,14 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
                     download_directory,
                     formats,
                     get_all_books_data(api_client),
+                    into_folder=into_folder
+                )
+            elif book_selector:
+                download_products(
+                    api_client,
+                    download_directory,
+                    formats,
+                    ask_and_get_books_data(api_client),
                     into_folder=into_folder
                 )
             elif grabd:

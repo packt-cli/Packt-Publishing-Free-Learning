@@ -1,6 +1,7 @@
 import datetime as dt
 from itertools import chain
 from math import ceil
+from re import split
 
 from api import (
     DEFAULT_PAGINATION_SIZE,
@@ -50,6 +51,80 @@ def get_single_page_books_data(api_client, page):
         return [{'id': t['productId'], 'title': t['productName']} for t in response.json().get('data')]
     except Exception:
         logger.error('Couldn\'t fetch page {} of user\'s books data.'.format(page))
+
+
+def ask_and_get_books_data(api_client):
+    """Show the book list, ask for the books id and return the data of the chosen books"""
+    books = get_all_books_data(api_client)
+    books.reverse()
+    i = 0
+    for book in books:
+        print(str(i) + '. ' + book['title'])
+        i += 1
+
+    book_ids = []
+    while len(book_ids) == 0:
+        selected_books = input('Enter the ids of the books to be downloaded separated by a comma, you can write 1-5 '
+                               'to select all the ids from 1 to 5. Type \'exit\' to exit. '
+                               'Ex: 1, 3, 7, 14-32, 54, 87\n>>>')
+        if selected_books == 'exit':
+            exit(0)
+        elif ',' in selected_books:
+            for book_id in split(',', selected_books):
+                if '-' not in book_id:
+                    try:
+                        book_ids.append(int(book_id))
+                    except ValueError:
+                        logger.error('The parameter \'{}\' is not a number'.format(book_id))
+                else:
+                    if book_id.count('-') == 1:
+                        range_par = split('-', book_id)
+                        if len(range_par) == 2:
+                            try:
+                                range_from = int(range_par[0])
+                                range_to = int(range_par[1])
+
+                                for i in range(range_from, range_to + 1):
+                                    if i not in book_ids:
+                                        book_ids.append(i)
+                            except ValueError:
+                                logger.error('The range \'{}\' is incorrect'.format(book_id))
+                        else:
+                            logger.error('The range \'{}\' is incorrect'.format(book_id))
+                    else:
+                        logger.error('Parameter \'{}\' contains more tha one -'.format(book_id))
+        elif '-' in selected_books:
+            if selected_books.count('-') == 1:
+                range_par = split('-', selected_books)
+                if len(range_par) == 2:
+                    try:
+                        range_from = int(range_par[0])
+                        range_to = int(range_par[1])
+
+                        for i in range(range_from, range_to + 1):
+                            if i not in book_ids:
+                                book_ids.append(i)
+                    except ValueError:
+                        logger.error('The range \'{}\' is incorrect'.format(selected_books))
+                else:
+                    logger.error('The range \'{}\' is incorrect'.format(selected_books))
+            else:
+                logger.error('Parameter \'{}\' contains more tha one -'.format(selected_books))
+        elif ' ' not in selected_books and ',' not in selected_books:
+            try:
+                book_ids = [int(selected_books)]
+            except ValueError:
+                logger.error('You must insert a number')
+        else:
+            logger.error('You must insert a number')
+
+    books_data = []
+    for book_id in book_ids:
+        try:
+            books_data.append(books[book_id])
+        except IndexError:
+            logger.error('ID {} does not exists'.format(book_id))
+    return books_data
 
 
 def claim_product(api_client, anticaptcha_key):

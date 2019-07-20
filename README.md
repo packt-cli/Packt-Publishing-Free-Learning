@@ -37,6 +37,11 @@ packt-cli -g
 packt-cli -gd
 ```
 
+- Option *-bs* [--book_selector] - show all owned books and select those to download
+```
+packt-cli -bs
+```
+
 - Option *-da* [--dall] - downloads all ebooks from your account
 ```
 packt-cli -da
