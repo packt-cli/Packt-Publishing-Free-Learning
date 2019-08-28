@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 import requests
 from requests.exceptions import ConnectionError
@@ -25,6 +26,28 @@ def slugify_product_name(title):
     return slugify(title, separator='_', lowercase=False)
 
 
+def wait_for_computation(predicate, timeout, retry_after):
+    """Return wrapped function retrying computation until result satisfies given predicate or timeout is reached."""
+    def wrapper(func):
+        def compute(*args, time_left=timeout, **kwargs):
+            if time_left <= 0:
+                raise TimeoutError('Timeout reached!')
+
+            try:
+                result = func(*args, **kwargs)
+                if predicate(result):
+                    return result
+                else:
+                    time.sleep(retry_after)
+                    return compute(*args, time_left=time_left - retry_after, **kwargs)
+            except Exception:
+                time.sleep(retry_after)
+                return compute(*args, time_left=time_left - retry_after, **kwargs)
+        return compute
+    return wrapper
+
+
+@wait_for_computation(lambda _: all(_.values()), 15.0, 0.75)
 def get_product_download_urls(api_client, product_id):
     error_message = 'Couldn\'t fetch download URLs for product {}.'.format(product_id)
     try:
