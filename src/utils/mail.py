@@ -20,7 +20,7 @@ DEFAULT_SUBJECT = "New free packt ebook"
 class MailBook:
 
     def __init__(self, cfg_file_path):
-        defaults = {'from_email': None, 'to_emails': [], 'kindle_emails': []}
+        defaults = {'to_emails': [], 'kindle_emails': []}
         config = configparser.ConfigParser(defaults=defaults)
         config.read(cfg_file_path)
         try:
