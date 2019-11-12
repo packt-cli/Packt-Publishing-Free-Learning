@@ -15,9 +15,9 @@ requirements = [
 
 dev_requirements = [
     'mccabe==0.6.1',
-    'pycodestyle==2.4.0',
-    'pyflakes==2.0.0',
-    'pylama==7.6.5'
+    'pycodestyle==2.5.0',
+    'pyflakes==2.1.1',
+    'pylama==7.7.1'
 ]
 
 setup(
@@ -44,6 +44,7 @@ setup(
     classifiers=[
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7'
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
     ]
 )

@@ -95,7 +95,7 @@ def download_products(api_client, download_directory, formats, product_list, int
                     try:
                         file_url = api_client.get(download_url).json().get('data')
                         r = api_client.get(file_url, timeout=100, stream=True)
-                        if r.status_code is 200:
+                        if r.status_code == 200:
                             try:
                                 with open(temp_file_path, 'wb') as f:
                                     total_length = int(r.headers.get('content-length'))

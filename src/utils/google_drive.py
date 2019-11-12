@@ -106,7 +106,7 @@ class GoogleDriveManager(object):
             logger.debug(file_name + " exists")
         else:
             logger.debug(file_name + " does not exist")
-            if file_type is "FILE":
+            if file_type == "FILE":
                 pass  # TODO
             else:  # create new folder
                 id = self.__create_new_folder(file_name, parent_id)
@@ -170,9 +170,7 @@ class GoogleDriveManager(object):
                     else:
                         logger.info('File {} already exists on Google Drive'.format(file_attrs[0]))
                 except Exception as e:
-                        logger.error('Error {} occurred while sending file: {} to Google Drive'.format(
-                            e, file_attrs[0])
-                        )
+                    logger.error('Error {} occurred while sending file: {} to Google Drive'.format(e, file_attrs[0]))
 
     def download_file(self, file_name, file_id):
         request = self._service.files().get_media(fileId=file_id)
