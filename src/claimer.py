@@ -80,6 +80,9 @@ def claim_product(api_client, anticaptcha_key):
         logger.info('You have already claimed Packt Free Learning "{}" offer.'.format(product_data['title']))
         return product_data
 
+    if anticaptcha_key is None:
+        return
+
     logger.info('Started solving ReCAPTCHA on Packt Free Learning website...')
     recaptcha_solution = solve_recaptcha(anticaptcha_key, PACKT_FREE_LEARNING_URL, PACKT_RECAPTCHA_SITE_KEY)
 

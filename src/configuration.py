@@ -21,7 +21,8 @@ class ConfigurationModel(object):
     @property
     def anticaptcha_api_key(self):
         """Return AntiCaptcha API key."""
-        return self.configuration.get("ANTICAPTCHA_DATA", 'key')
+        return self.configuration.get("ANTICAPTCHA_DATA", 'key')\
+            if self.configuration.has_option("ANTICAPTCHA_DATA", 'key') else None
 
     @property
     def config_download_data(self):
