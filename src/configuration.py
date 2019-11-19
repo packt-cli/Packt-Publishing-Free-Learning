@@ -16,7 +16,10 @@ class ConfigurationModel(object):
     @property
     def packt_login_credentials(self):
         """Return Packt user login credentials."""
-        return self.configuration.get('LOGIN_DATA', 'email'), self.configuration.get('LOGIN_DATA', 'password')
+        return {
+            'username': self.configuration.get('LOGIN_DATA', 'email'),
+            'password': self.configuration.get('LOGIN_DATA', 'password')
+        }
 
     @property
     def anticaptcha_api_key(self):

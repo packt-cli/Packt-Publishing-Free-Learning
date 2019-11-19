@@ -59,6 +59,7 @@ class Anticaptcha(object):
         raise AnticaptchaException('Timeout {} reached '.format(self.timeout))
 
     def solve_recaptcha(self, website_url, website_key):
+        logger.info('Started solving ReCAPTCHA for {} website...'.format(website_url))
         task_id = self.__create_noproxy_task(website_url, website_key)
         logger.info('Waiting for completion of the {} task...'.format(task_id))
         solution = self.__wait_for_task_result(task_id)['solution']['gRecaptchaResponse']

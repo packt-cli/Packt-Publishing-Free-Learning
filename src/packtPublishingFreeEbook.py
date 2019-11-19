@@ -7,6 +7,7 @@ from api import PacktAPIClient
 from claimer import claim_product, get_all_books_data
 from configuration import ConfigurationModel
 from downloader import download_products, slugify_product_name
+from utils.anticaptcha import solve_recaptcha
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -19,6 +20,9 @@ FAILURE_EMAIL_SUBJECT = "{} Grabbing a new free Packt ebook failed"
 FAILURE_EMAIL_BODY = "Today's free Packt ebook grabbing has failed with exception: {}!\n\nCheck this out!"
 
 AVAILABLE_DOWNLOAD_FORMATS = ('pdf', 'mobi', 'epub', 'video', 'code')
+
+PACKT_URL = 'https://www.packtpub.com/'
+PACKT_RECAPTCHA_SITE_KEY = '6LeAHSgUAAAAAKsn5jo6RUSTLVxGNYyuvUcLMe0_'
 
 
 @click.command()
@@ -49,11 +53,12 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
     try:
         cfg = ConfigurationModel(config_file_path)
         product_data = None
-        api_client = PacktAPIClient(*cfg.packt_login_credentials)
+        recaptcha_solution = solve_recaptcha(cfg.anticaptcha_api_key, PACKT_URL, PACKT_RECAPTCHA_SITE_KEY)
+        api_client = PacktAPIClient({'recaptcha': recaptcha_solution, **cfg.packt_login_credentials})
 
         # Grab the newest book
         if grab or grabd or sgd or mail:
-            product_data = claim_product(api_client, cfg.anticaptcha_api_key)
+            product_data = claim_product(api_client, recaptcha_solution)
 
             # Send email about successful book grab. Do it only when book
             # isn't going to be emailed as we don't want to send email twice.

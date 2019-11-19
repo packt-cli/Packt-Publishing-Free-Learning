@@ -23,16 +23,15 @@ DEFAULT_PAGINATION_SIZE = 25
 class PacktAPIClient:
     """Packt API client making API requests on script's behalf."""
 
-    def __init__(self, email, password):
-        self.email = email
-        self.password = password
+    def __init__(self, credentials):
         self.session = requests.Session()
+        self.credentials = credentials
         self.fetch_jwt()
 
     def fetch_jwt(self):
         """Fetch user's JWT to be used when making Packt API requests."""
         try:
-            response = requests.post(PACKT_API_LOGIN_URL, json={'username': self.email, 'password': self.password})
+            response = requests.post(PACKT_API_LOGIN_URL, json=self.credentials)
             jwt = response.json().get('data').get('access')
             self.session.headers.update({'authorization': 'Bearer {}'.format(jwt)})
             logger.info('JWT token has been fetched successfully!')

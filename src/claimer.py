@@ -10,14 +10,9 @@ from api import (
     PACKT_API_USER_URL,
     PACKT_PRODUCT_SUMMARY_URL
 )
-from utils.anticaptcha import solve_recaptcha
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
-
-
-PACKT_FREE_LEARNING_URL = 'https://www.packtpub.com/packt/offers/free-learning/'
-PACKT_RECAPTCHA_SITE_KEY = '6LeAHSgUAAAAAKsn5jo6RUSTLVxGNYyuvUcLMe0_'
 
 
 def get_all_books_data(api_client):
@@ -52,7 +47,7 @@ def get_single_page_books_data(api_client, page):
         logger.error('Couldn\'t fetch page {} of user\'s books data.'.format(page))
 
 
-def claim_product(api_client, anticaptcha_key):
+def claim_product(api_client, recaptcha_solution):
     """Grab Packt Free Learning ebook."""
     logger.info("Start grabbing ebook...")
 
@@ -79,9 +74,6 @@ def claim_product(api_client, anticaptcha_key):
     if any(product_id == book['id'] for book in get_all_books_data(api_client)):
         logger.info('You have already claimed Packt Free Learning "{}" offer.'.format(product_data['title']))
         return product_data
-
-    logger.info('Started solving ReCAPTCHA on Packt Free Learning website...')
-    recaptcha_solution = solve_recaptcha(anticaptcha_key, PACKT_FREE_LEARNING_URL, PACKT_RECAPTCHA_SITE_KEY)
 
     claim_response = api_client.put(
         PACKT_API_FREE_LEARNING_CLAIM_URL.format(user_id=user_id, offer_id=offer_id),
