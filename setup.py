@@ -14,10 +14,12 @@ requirements = [
 ]
 
 dev_requirements = [
+    'bumpversion==0.5.3',
     'mccabe==0.6.1',
     'pycodestyle==2.5.0',
     'pyflakes==2.1.1',
-    'pylama==7.7.1'
+    'pylama==7.7.1',
+    'twine==1.15.0'
 ]
 
 setup(
