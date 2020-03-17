@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 
@@ -23,7 +24,13 @@ class PacktConnectionError(ConnectionError):
 
 def slugify_product_name(title):
     """Return book title with spaces replaced by underscore and unicodes replaced by characters valid in filenames."""
-    return slugify(title, separator='_', lowercase=False)
+    return slugify(
+        title,
+        separator='_',
+        lowercase=False,
+        regex_pattern=re.compile(r'[^-a-zA-Z0-9\+\#\.\-\–]+'),
+        replacements=[['–', '-']]
+    )
 
 
 def wait_for_computation(predicate, timeout, retry_after):
