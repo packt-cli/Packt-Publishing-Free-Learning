@@ -7,9 +7,10 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
 package_version = '1.5.1'
 
 requirements = [
-    'click==7.0',
-    'google-api-python-client==1.6.3',
-    'requests==2.20.0',
+    'click==7.1.1',
+    'google-api-python-client==1.8.0',
+    'oauth2client==4.1.3',
+    'requests==2.23.0',
     'python-slugify==4.0.0'
 ]
 
@@ -17,9 +18,9 @@ dev_requirements = [
     'bumpversion==0.5.3',
     'mccabe==0.6.1',
     'pycodestyle==2.5.0',
-    'pyflakes==2.1.1',
+    'pyflakes==2.2.0',
     'pylama==7.7.1',
-    'twine==1.15.0'
+    'twine==3.1.1'
 ]
 
 setup(
