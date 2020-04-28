@@ -20,7 +20,8 @@ dev_requirements = [
     'pycodestyle==2.5.0',
     'pyflakes==2.2.0',
     'pylama==7.7.1',
-    'twine==3.1.1'
+    'twine<2; python_version < "3.6"',
+    'twine==3.1.1; python_version >= "3.6"'
 ]
 
 setup(
