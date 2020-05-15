@@ -1,6 +1,6 @@
 [![Version](https://img.shields.io/pypi/v/packt.svg)](https://pypi.org/project/packt/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/packt.svg)](https://pypi.org/project/packt/)
-![lint](https://github.com/luk6xff/Packt-Publishing-Free-Learning/workflows/lint/badge.svg?branch=master)
+![lint](https://github.com/luk6xff/Packt-Publishing-Free-Learning/workflows/lint/badge.svg?branch=master&event=push)
 
 ## Free Learning Packt Publishing script
 
