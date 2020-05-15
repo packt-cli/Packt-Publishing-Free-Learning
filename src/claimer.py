@@ -59,11 +59,11 @@ def claim_product(api_client, recaptcha_solution):
             'dateTo': (utc_today + dt.timedelta(days=1)).isoformat()
         }
     )
-    """Traitement de l'absence d'offre"""
-    offer_count=offer_response.json().get('count')
+    """Handle case when there is no Free Learning offer"""
+    offer_count = offer_response.json().get('count')
     if offer_count == 0:
-        logger.info(" Pas d'offre PACKT freelearning disponible ce jour ")
-        raise Exception(" Pas d'offre PACKT freelearning disponible ce jour ")
+        logger.info(" There is no Free Learning offer right now ")
+        raise Exception(" There is no Free Learning offer right now ")
 
     [offer_data] = offer_response.json().get('data')
     offer_id = offer_data.get('id')
