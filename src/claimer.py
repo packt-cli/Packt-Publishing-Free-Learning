@@ -21,10 +21,13 @@ def get_all_books_data(api_client):
     try:
         response = api_client.get(PACKT_API_PRODUCTS_URL)
         pages_total = int(ceil(response.json().get('count') / DEFAULT_PAGINATION_SIZE))
-        my_books_data = list(chain(*map(
-            lambda page: get_single_page_books_data(api_client, page),
-            range(pages_total)
-        )))
+
+        ids, my_books_data = (set(), [])
+        for book in chain(*map(lambda page: get_single_page_books_data(api_client, page), range(pages_total))):
+            if book['id'] not in ids:
+                ids.add(book['id'])
+                my_books_data.append(book)
+
         logger.info('Books data has been successfully fetched.')
         return my_books_data
     except (AttributeError, TypeError):
