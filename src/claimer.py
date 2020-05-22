@@ -1,6 +1,7 @@
 import datetime as dt
 from itertools import chain
 from math import ceil
+from operator import itemgetter
 
 from api import (
     DEFAULT_PAGINATION_SIZE,
@@ -68,7 +69,9 @@ def claim_product(api_client, recaptcha_solution):
         logger.info("There is no Free Learning offer right now")
         raise Exception("There is no Free Learning offer right now")
 
-    [offer_data] = offer_response.json().get('data')
+    # Sometimes they are several offers. We just get the last updated one.
+    offer_data = max(offer_response.json().get('data'), key=itemgetter('updatedAt'))
+
     offer_id = offer_data.get('id')
     product_id = offer_data.get('productId')
 
