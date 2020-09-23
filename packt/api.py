@@ -3,7 +3,7 @@ import logging
 
 import requests
 
-from utils.logger import get_logger
+from .utils.logger import get_logger
 
 logger = get_logger(__name__)
 logging.getLogger("requests").setLevel(logging.WARNING)  # downgrading logging level for requests

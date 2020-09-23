@@ -7,11 +7,11 @@ import requests
 from requests.exceptions import ConnectionError
 from slugify import slugify
 
-from api import (
+from .api import (
     PACKT_API_PRODUCT_FILE_DOWNLOAD_URL,
     PACKT_API_PRODUCT_FILE_TYPES_URL
 )
-from utils.logger import get_logger
+from .utils.logger import get_logger
 
 
 logger = get_logger(__name__)

@@ -3,12 +3,12 @@ import datetime as dt
 import os
 import sys
 
-from api import PacktAPIClient
-from claimer import claim_product, get_all_books_data
-from configuration import ConfigurationModel
-from downloader import download_products, slugify_product_name
-from utils.anticaptcha import solve_recaptcha
-from utils.logger import get_logger
+from .api import PacktAPIClient
+from .claimer import claim_product, get_all_books_data
+from .configuration import ConfigurationModel
+from .downloader import download_products, slugify_product_name
+from .utils.anticaptcha import solve_recaptcha
+from .utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -63,7 +63,7 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
             # Send email about successful book grab. Do it only when book
             # isn't going to be emailed as we don't want to send email twice.
             if status_mail and not mail:
-                from utils.mail import MailBook
+                from .utils.mail import MailBook
                 mb = MailBook(config_file_path)
                 mb.send_info(
                     subject=SUCCESS_EMAIL_SUBJECT.format(
@@ -100,11 +100,11 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
                 if os.path.isfile(path) and slugify_product_name(product_data['title']) in path
             ]
             if sgd:
-                from utils.google_drive import GoogleDriveManager
+                from .utils.google_drive import GoogleDriveManager
                 google_drive = GoogleDriveManager(config_file_path)
                 google_drive.send_files(paths)
             else:
-                from utils.mail import MailBook
+                from .utils.mail import MailBook
                 mb = MailBook(config_file_path)
                 pdf_path = None
                 mobi_path = None
@@ -124,7 +124,7 @@ def packt_cli(cfgpath, grab, grabd, dall, sgd, mail, status_mail, folder, noauth
     except Exception as e:
         logger.error("Exception occurred {}".format(e))
         if status_mail:
-            from utils.mail import MailBook
+            from .utils.mail import MailBook
             mb = MailBook(config_file_path)
             mb.send_info(
                 subject=FAILURE_EMAIL_SUBJECT.format(dt.datetime.now().strftime(DATE_FORMAT)),

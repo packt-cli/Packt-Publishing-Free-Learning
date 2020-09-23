@@ -3,7 +3,7 @@ from itertools import chain
 from math import ceil
 from operator import itemgetter
 
-from api import (
+from .api import (
     DEFAULT_PAGINATION_SIZE,
     PACKT_API_FREE_LEARNING_CLAIM_URL,
     PACKT_API_FREE_LEARNING_OFFERS_URL,
@@ -11,7 +11,7 @@ from api import (
     PACKT_API_USER_URL,
     PACKT_PRODUCT_SUMMARY_URL
 )
-from utils.logger import get_logger
+from .utils.logger import get_logger
 
 logger = get_logger(__name__)
 
