@@ -12,7 +12,6 @@ GET_TASK_API_URL = urljoin(API_URL, 'getTaskResult')
 
 
 class AnticaptchaException(Exception):
-    
     def __init__(self, message):
         self.message = message
         logger.error(message)
