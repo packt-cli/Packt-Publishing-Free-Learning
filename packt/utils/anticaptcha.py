@@ -1,5 +1,6 @@
 import requests
 import time
+import sys
 from urllib.parse import urljoin
 
 from .logger import get_logger
@@ -11,7 +12,12 @@ GET_TASK_API_URL = urljoin(API_URL, 'getTaskResult')
 
 
 class AnticaptchaException(Exception):
-    pass
+    
+    def __init__(self, message):
+        self.message = message
+        logger.error(message)
+        super().__init__(self.message)
+        sys.exit(1)
 
 
 class Anticaptcha(object):
