@@ -10,7 +10,7 @@ requirements = [
     'click==7.1.1',
     'google-api-python-client==1.8.0',
     'oauth2client==4.1.3',
-    'requests==2.23.0',
+    'requests==2.31.0',
     'python-slugify==4.0.0'
 ]
 
